@@ -1,0 +1,15 @@
+[build]
+  command = "npm run build"
+  publish = "dist"
+
+# 處理 SPA 路由
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
+
+# 環境變數設置示例
+[context.production.environment]
+  # 這些值會被 Netlify 界面中設置的環境變數覆蓋
+  # VITE_SUPABASE_URL = "your_production_supabase_url"
+  # VITE_SUPABASE_ANON_KEY = "your_production_supabase_anon_key"
