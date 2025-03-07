@@ -50,7 +50,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     // Set up auth state listener
     const { data: authListener } = supabase.auth.onAuthStateChange(
-      async (event, session) => {
+      async (_event, session) => {
         setUser(session?.user ?? null);
         setLoading(false);
       }
@@ -67,7 +67,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const signUp = async (email: string, password: string, metadata?: any) => {
     try {
       setLoading(true);
-      const { data, error } = await signUpWithEmail(email, password, metadata);
+      const { error } = await signUpWithEmail(email, password, metadata);
       
       if (error) {
         throw error;
@@ -86,7 +86,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const signIn = async (email: string, password: string) => {
     try {
       setLoading(true);
-      const { data, error } = await signInWithEmail(email, password);
+      const { error } = await signInWithEmail(email, password);
       
       if (error) {
         throw error;
@@ -105,7 +105,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const signInWithSocial = async (provider: 'google' | 'facebook' | 'apple') => {
     try {
       setLoading(true);
-      const { data, error } = await signInWithProvider(provider);
+      const { error } = await signInWithProvider(provider);
       
       if (error) {
         throw error;
