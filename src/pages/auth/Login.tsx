@@ -24,6 +24,8 @@ const Login = () => {
   const [password, setPassword] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [errorDetails, setErrorDetails] = useState<string | null>(null);
+  const [showErrorDetails, setShowErrorDetails] = useState(false);
 
   // Form validation
   const isFormValid = () => {
@@ -70,7 +72,20 @@ const Login = () => {
       // Social login successful - will redirect automatically
     } catch (error: any) {
       console.error(`${provider} login error:`, error);
-      setErrorMessage(error.message || '社交媒體登入失敗，請稍後再試');
+      // 处理 Google OAuth 错误
+      if (error.message?.includes('redirect_uri_mismatch')) {
+        setErrorMessage(`無法使用${provider}登入，重定向 URI 不匹配`);
+        setErrorDetails('技術詳情：OAuth 重定向 URI 不符合 Google 開發者控制台中的設定。若問題持續，請聯繫客服。');
+      } else if (error.message?.includes('popup_closed')) {
+        setErrorMessage(`${provider}登入被取消，您關閉了登入視窗`);
+      } else if (error.message?.includes('popup_blocked')) {
+        setErrorMessage(`瀏覽器阻止了${provider}登入視窗，請允許彈出視窗`);
+      } else {
+        setErrorMessage(error.message || `社交媒體登入失敗，請稍後再試`);
+        if (error.message) {
+          setErrorDetails(`錯誤詳情：${error.message}`);
+        }
+      }
       setIsSubmitting(false);
     }
   };
@@ -106,9 +121,26 @@ const Login = () => {
       <main className="flex flex-col px-6 py-8 gap-6 flex-grow">
         {/* Error Message */}
         {errorMessage && (
-          <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg flex items-start gap-2">
-            <AlertCircle size={20} className="text-red-500 flex-shrink-0 mt-0.5" />
-            <span className="text-sm">{errorMessage}</span>
+          <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg flex flex-col">
+            <div className="flex items-start gap-2">
+              <AlertCircle size={20} className="text-red-500 flex-shrink-0 mt-0.5" />
+              <span className="text-sm font-medium">{errorMessage}</span>
+            </div>
+            
+            {errorDetails && (
+              <div className="mt-2 ml-7">
+                <button 
+                  className="text-xs text-red-600 underline focus:outline-none" 
+                  onClick={() => setShowErrorDetails(!showErrorDetails)}
+                >
+                  {showErrorDetails ? '隱藏詳情' : '查看詳情'}
+                </button>
+                
+                {showErrorDetails && (
+                  <p className="text-xs text-red-600 mt-1">{errorDetails}</p>
+                )}
+              </div>
+            )}
           </div>
         )}
         
@@ -185,7 +217,7 @@ const Login = () => {
               onClick={() => handleSocialLogin('google')}
               disabled={isSubmitting}
             >
-              <BrandGoogle size={22} className="text-gray-700" />
+              <BrandGoogle size={22} className="text-[#4285F4]" />
             </Button>
             <Button 
               variant="outline" 
@@ -194,7 +226,7 @@ const Login = () => {
               onClick={() => handleSocialLogin('facebook')}
               disabled={isSubmitting}
             >
-              <BrandFacebook size={22} className="text-gray-700" />
+              <BrandFacebook size={22} className="text-[#1877F2]" />
             </Button>
             <Button 
               variant="outline" 
