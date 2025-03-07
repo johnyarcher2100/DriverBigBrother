@@ -14,11 +14,12 @@ import {
   useTheme,
   ChakraProvider
 } from '@chakra-ui/react';
-import { FiMapPin, FiSettings, FiTruck, FiRoute } from 'react-icons/fi';
+import { FiMapPin, FiSettings, FiTruck } from 'react-icons/fi';
+import { MdRoute } from 'react-icons/md';
 import { FaCar } from 'react-icons/fa';
 
 const Home = () => {
-  const { user, logout } = useAuth();
+  const { logout } = useAuth();
   const [isLoggingOut, setIsLoggingOut] = useState(false);
   const navigate = useNavigate();
   const theme = useTheme();
@@ -44,12 +45,19 @@ const Home = () => {
     }
   };
 
-  const goToNavigation = (path) => {
+  const goToNavigation = (path: string) => {
     navigate(path);
   };
 
+  // 定義行程類型
+  interface Trip {
+    from: string;
+    to: string;
+    price: string;
+  }
+
   // 最近行程數據
-  const recentTrips = [
+  const recentTrips: Trip[] = [
     {
       "from": "桃園國際機場",
       "to": "台北車站",
@@ -67,8 +75,16 @@ const Home = () => {
     }
   ];
 
+  // 定義服務類型
+  interface Service {
+    title: string;
+    desc: string;
+    price: string;
+    image: string;
+  }
+
   // 推薦服務數據
-  const recommendedServices = [
+  const recommendedServices: Service[] = [
     {
       "title": "商務用車",
       "desc": "高級舒適的商務座駕",
@@ -284,7 +300,7 @@ const Home = () => {
                   gap={3}
                 >
                   <Icon
-                    as={FiRoute}
+                    as={MdRoute}
                     boxSize={5}
                     color={kStyleGlobal.colors.primary[500]}
                   />
@@ -400,7 +416,7 @@ const Home = () => {
           />
           <IconButton
             aria-label="行程"
-            icon={<Icon as={FiRoute} />}
+            icon={<Icon as={MdRoute} />}
             variant="ghost"
             onClick={() => goToNavigation("/trip-history")}
           />
