@@ -25,11 +25,22 @@ import {
   FiMic,
   FiClock as FiHistory
 } from 'react-icons/fi';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
+import { FiCrown, FiPlane, FiPackage } from 'react-icons/fi';
+import { RiHotelLine } from 'react-icons/ri';
 import BottomNavBar from '@/components/common/BottomNavBar';
 // 定義全局樣式
 const kStyleGlobal = {
   colors: {
+    premium: {
+      50: '#F5F3FF',
+      100: '#EDE9FE',
+      500: '#6D28D9',
+      600: '#5B21B6',
+      700: '#4C1D95',
+      gradient: 'linear-gradient(135deg, #6D28D9 0%, #7C3AED 100%)'
+    },
+    gold: '#D4AF37',
     primary: {
       50: '#E6F6FF',
       100: '#BAE3FF',
@@ -104,10 +115,12 @@ const SelectDestination: React.FC = () => {
   
   // 預設位置清單
   const savedLocations = [
-    { icon: "home", label: "家" },
-    { icon: "building", label: "公司" },
-    { icon: "star", label: "收藏" },
-    { icon: "history", label: "最近" }
+    { icon: "crown", label: "VIP 接送", type: "premium" },
+    { icon: "plane", label: "松山機場", type: "premium" },
+    { icon: "hotel", label: "五星酒店", type: "premium" },
+    { icon: "briefcase", label: "商務中心", type: "premium" },
+    { icon: "home", label: "家", type: "standard" },
+    { icon: "building", label: "公司", type: "standard" }
   ];
   
   // 處理目的地變更
@@ -172,7 +185,7 @@ const SelectDestination: React.FC = () => {
           
           // 設置地圖圖片URL - 使用 Google Maps Static API
           const apiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY || '';
-          setMapImageUrl(`https://maps.googleapis.com/maps/api/staticmap?center=${latitude},${longitude}&zoom=15&size=800x400&markers=color:red%7C${latitude},${longitude}&map_id=roadmap&key=${apiKey}`);
+          setMapImageUrl(`https://maps.googleapis.com/maps/api/staticmap?center=${latitude},${longitude}&zoom=14&size=800x600&scale=2&maptype=hybrid&markers=color:red%7C${latitude},${longitude}&map_id=roadmap&key=${apiKey}`);
           
           setIsLoading(false);
         },
@@ -190,7 +203,7 @@ const SelectDestination: React.FC = () => {
         }
       );
     } else {
-      setLocationError("您的瀏覽器不支持地理位置功能");
+      setLocationError("無法使用定位服務，請確認您的權限設定");
       setStartingLocation("位置未知");
       setIsLoading(false);
     }
@@ -237,7 +250,7 @@ const SelectDestination: React.FC = () => {
             fontWeight={kStyleGlobal.fontWeights.semibold}
             color={kStyleGlobal.colors.textColor}
           >
-            選擇目的地
+            尊榮接送服務
           </Text>
           <Button
             variant={"ghost"}
@@ -249,7 +262,7 @@ const SelectDestination: React.FC = () => {
             <Text
               fontSize={kStyleGlobal.fontSizes.md}
             >
-              確認
+              完成
             </Text>
           </Button>
         </Flex>
@@ -263,15 +276,17 @@ const SelectDestination: React.FC = () => {
           {/* 顯示用戶初始位置地圖 */}
           <Box
             width={"100%"}
-            height={"200px"}
+            height={"300px"}
             overflow={"hidden"}
             bg={"gray.100"}
             position={"relative"}
+            borderRadius={"xl"}
+            boxShadow={"2xl"}
           >
             {!isLoading && !locationError && mapImageUrl ? (
               <Image 
                 src={mapImageUrl} 
-                alt="初始位置地圖"
+                alt="您的專屬接送地圖"
                 width="100%"
                 height="100%"
                 objectFit="cover"
@@ -283,7 +298,7 @@ const SelectDestination: React.FC = () => {
                 justifyContent="center" 
                 alignItems="center"
               >
-                <Text>正在加載地圖...</Text>
+                <Text>正在為您準備專屬地圖...</Text>
               </Flex>
             ) : (
               <Flex 
@@ -293,7 +308,7 @@ const SelectDestination: React.FC = () => {
                 alignItems="center"
                 bg="gray.200"
               >
-                <Text color="gray.500">無法加載地圖</Text>
+                <Text color="gray.500">暫時無法顯示地圖，請稍後再試</Text>
               </Flex>
             )}
           </Box>
@@ -307,7 +322,7 @@ const SelectDestination: React.FC = () => {
             bg={"white"}
             p={4}
             borderRadius={"lg"}
-            shadow={"md"}
+            shadow="xl" bgGradient={kStyleGlobal.colors.premium.gradient} _hover={{ transform: 'translateY(-2px)', shadow: '2xl' }} transition="all 0.3s ease-in-out"
           >
             <InputGroup size={"lg"}>
               <InputLeftElement
@@ -321,7 +336,15 @@ const SelectDestination: React.FC = () => {
               </InputLeftElement>
               <Input
                 bg={"white"}
-                placeholder={"輸入目的地"}
+                placeholder={"請輸入您的目的地"}
+                _placeholder={{ color: "gray.400" }}
+                fontSize={"md"}
+                borderWidth={2}
+                borderColor={"premium.100"}
+                _focus={{
+                  borderColor: "premium.500",
+                  boxShadow: "0 0 0 1px " + kStyleGlobal.colors.premium[500]
+                }}
                 fontSize={"md"}
                 pl={12}
                 pr={12}
@@ -363,18 +386,21 @@ const SelectDestination: React.FC = () => {
                   bg={"white"}
                   px={6}
                   py={3}
-                  shadow={"md"}
+                  shadow="xl" bgGradient={kStyleGlobal.colors.premium.gradient} _hover={{ transform: 'translateY(-2px)', shadow: '2xl' }} transition="all 0.3s ease-in-out"
                   leftIcon={
+                    item.icon === "crown" ? <FiCrown size={18} color={kStyleGlobal.colors.gold} /> :
+                    item.icon === "plane" ? <FiPlane size={18} /> :
+                    item.icon === "hotel" ? <RiHotelLine size={18} /> :
+                    item.icon === "briefcase" ? <FiPackage size={18} /> :
                     item.icon === "home" ? <FiHome size={18} /> :
-                    item.icon === "building" ? <FiBriefcase size={18} /> :
-                    item.icon === "star" ? <FiStar size={18} /> :
-                    <FiHistory size={18} />
+                    <FiBriefcase size={18} />
                   }
                   borderRadius={"full"}
                   onClick={() => handleLocationSelect(item.label)}
                   _hover={{
-                    transform: "translateY(-1px)",
-                    shadow: "lg"
+                    transform: item.type === "premium" ? "translateY(-2px)" : "translateY(-1px)",
+                    shadow: item.type === "premium" ? "2xl" : "lg",
+                    bg: item.type === "premium" ? "premium.50" : "white"
                   }}
                   transition={"all 0.2s"}
                 >
@@ -401,7 +427,9 @@ const SelectDestination: React.FC = () => {
             animate={{ y: 0 }}
             transition={{
               type: "spring",
-              damping: 25
+              stiffness: 300,
+              damping: 20,
+              mass: 1
             }}
           >
             <Flex
@@ -415,12 +443,12 @@ const SelectDestination: React.FC = () => {
               >
                 <Box
                   p={3}
-                  bg={"primary.50"}
+                  bgGradient={kStyleGlobal.colors.premium.gradient}
                   borderRadius={"full"}
                 >
                   <FiMapPin
                     size={24}
-                    color={kStyleGlobal.colors.primary[500]}
+                    color={kStyleGlobal.colors.premium[500]}
                   />
                 </Box>
                 <Flex
@@ -464,7 +492,9 @@ const SelectDestination: React.FC = () => {
                 </Text>
                 <Flex
                   justifyContent={"space-between"}
-                  bg={"gray.50"}
+                  bg={"premium.50"}
+borderWidth={1}
+borderColor={"premium.100"}
                   p={4}
                   borderRadius={"xl"}
                 >
@@ -474,12 +504,12 @@ const SelectDestination: React.FC = () => {
                   >
                     <FiClock
                       size={20}
-                      color={kStyleGlobal.colors.primary[500]}
+                      color={kStyleGlobal.colors.premium[500]}
                     />
                     <Text
                       fontSize={kStyleGlobal.fontSizes.md}
                     >
-                      預估時間: {estimatedTime} 分鐘
+                      預計接送時間: {estimatedTime} 分鐘
                     </Text>
                   </Flex>
                   <Flex
@@ -488,12 +518,12 @@ const SelectDestination: React.FC = () => {
                   >
                     <FiClock
                       size={20}
-                      color={kStyleGlobal.colors.primary[500]}
+                      color={kStyleGlobal.colors.premium[500]}
                     />
                     <Text
                       fontSize={kStyleGlobal.fontSizes.md}
                     >
-                      距離: {distance} 公里
+                      預計行駛距離: {distance} 公里
                     </Text>
                   </Flex>
                 </Flex>
@@ -502,7 +532,7 @@ const SelectDestination: React.FC = () => {
               {/* 確認按鈕 */}
               <Button
                 size={"lg"}
-                bg={destinationEntered && routeCalculated ? "primary.500" : "gray.400"}
+                bgGradient={destinationEntered && routeCalculated ? kStyleGlobal.colors.premium.gradient : "linear-gradient(135deg, #A0AEC0 0%, #718096 100%)"} _hover={{ transform: destinationEntered && routeCalculated ? 'translateY(-2px)' : 'none' }}
                 color={"white"}
                 h={"56px"}
                 fontSize={"md"}
@@ -513,7 +543,7 @@ const SelectDestination: React.FC = () => {
                 }}
                 onClick={() => goToNavigation("/select-car-type")}
               >
-                確認目的地
+                確認尊榮接送
               </Button>
             </Flex>
           </motion.div>
