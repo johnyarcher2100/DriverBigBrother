@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { 
   ChevronLeft, 
@@ -28,6 +28,18 @@ const Login = () => {
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [errorDetails, setErrorDetails] = useState<string | null>(null);
   const [showErrorDetails, setShowErrorDetails] = useState(false);
+  const [isInLineApp, setIsInLineApp] = useState<boolean>(false);
+
+  // 检测是否在 LINE 应用内
+  useEffect(() => {
+    const userAgent = window.navigator.userAgent.toLowerCase();
+    const inLineApp = userAgent.includes('line');
+    setIsInLineApp(inLineApp);
+    
+    if (inLineApp) {
+      console.log('检测到在 LINE 应用内访问登录页面');
+    }
+  }, []);
 
   // Form validation
   const isFormValid = () => {
@@ -232,6 +244,14 @@ const Login = () => {
             <p className="text-amber-700 text-sm font-medium mb-1">社交媒體登入功能暫時關閉</p>
             <p className="text-amber-600 text-xs">Facebook 和 Apple 登入功能正在升級中，目前僅支持 Google 登入和電子郵件登入</p>
           </div>
+          
+          {/* LINE 应用内警告 */}
+          {isInLineApp && (
+            <div className="w-full p-3 bg-red-50 border border-red-200 rounded-lg text-center mt-2">
+              <p className="text-red-700 text-sm font-medium mb-1">請注意：LINE 內置瀏覽器限制</p>
+              <p className="text-red-600 text-xs">由於 Google 安全政策限制，無法在 LINE 應用內使用 Google 登入。請使用外部瀏覽器開啟本網站進行登入。</p>
+            </div>
+          )}
 
           <div className="flex gap-6">
             <Button 

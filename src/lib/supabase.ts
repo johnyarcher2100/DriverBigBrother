@@ -35,13 +35,40 @@ export const signInWithEmail = async (email: string, password: string) => {
 };
 
 export const signInWithProvider = async (provider: 'google' | 'facebook' | 'apple') => {
+  // 检测是否在 LINE 或其他应用内置浏览器中
+  const userAgent = window.navigator.userAgent.toLowerCase();
+  const isInLineApp = userAgent.includes('line');
+  const isInEmbeddedBrowser = userAgent.includes('wechat') || userAgent.includes('fb_iab') || 
+                             userAgent.includes('instagram') || userAgent.includes('messenger');
+  
+  // 如果是 Google 登录且在内置浏览器中，抛出错误
+  if (provider === 'google' && (isInLineApp || isInEmbeddedBrowser)) {
+    console.warn('检测到在应用内置浏览器中尝试 Google 登录');
+    return { 
+      data: null, 
+      error: new Error('由於 Google 安全政策限制，無法在 LINE 或其他應用內使用 Google 登入\n\n請使用外部瀏覽器開啟本網站來登入，或使用電子郵件方式註冊。') 
+    };
+  }
+  
   // 获取当前域名作为重定向基础 URL
   const redirectBase = window.location.origin;
   
   // 根据不同的提供商配置不同的选项
   let options: any = {};
   
-  if (provider === 'facebook') {
+  // 为 Google 登录配置选项
+  if (provider === 'google') {
+    options = {
+      redirectTo: `${redirectBase}/auth/callback`,
+      queryParams: {
+        access_type: 'offline',  // 获取刷新令牌
+        prompt: 'select_account'  // 始终显示账号选择器
+      }
+    };
+    console.log('Google 登录配置:', options);
+  }
+  // Facebook 登录配置
+  else if (provider === 'facebook') {
     console.log('Facebook 登录开始，重定向 URL 基础:', redirectBase);
     
     // 使用更详细的 Facebook 登录配置
