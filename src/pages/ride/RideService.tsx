@@ -45,9 +45,22 @@ const RideService: React.FC = () => {
   // 状态管理
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [currentLocation, setCurrentLocation] = useState("正在獲取位置...");
-  const [coordinates, setCoordinates] = useState({ latitude: 0, longitude: 0 });
+  // 存儲用戶坐標，雖然目前未直接使用但保留供未來功能擴展
+  const [_coordinates, setCoordinates] = useState({ latitude: 0, longitude: 0 });
   const [isLoadingLocation, setIsLoadingLocation] = useState(true);
-  const [nearbyAttractions, setNearbyAttractions] = useState([]);
+  // 定義景點類型
+  interface Attraction {
+    name: string;
+    latitude: number;
+    longitude: number;
+    description: string;
+    distance?: number;
+    time?: string;
+    price?: string;
+    estimatedTimeInMinutes?: number;
+  }
+  
+  const [nearbyAttractions, setNearbyAttractions] = useState<Attraction[]>([]);
   const navigate = useNavigate();
   const theme = useTheme();
   
@@ -124,7 +137,7 @@ const RideService: React.FC = () => {
   }, [GOOGLE_MAPS_API_KEY]);
   
   // 計算兩點之間的距離（使用 Haversine 公式）
-  const calculateDistance = (lat1, lon1, lat2, lon2) => {
+  const calculateDistance = (lat1: number, lon1: number, lat2: number, lon2: number): number => {
     const R = 6371; // 地球半徑（公里）
     const dLat = (lat2 - lat1) * (Math.PI / 180);
     const dLon = (lon2 - lon1) * (Math.PI / 180);
@@ -138,13 +151,13 @@ const RideService: React.FC = () => {
   };
   
   // 估算行車時間（假設平均速度為 40 公里/小時）
-  const estimateDrivingTime = (distanceInKm) => {
+  const estimateDrivingTime = (distanceInKm: number): number => {
     const averageSpeedKmPerHour = 40;
     return (distanceInKm / averageSpeedKmPerHour) * 60; // 返回分鐘數
   };
   
   // 獲取附近景點（30-60分鐘車程內）
-  const getNearbyAttractions = (latitude, longitude) => {
+  const getNearbyAttractions = (latitude: number, longitude: number): void => {
     // 計算每個景點的距離和預估時間
     const attractionsWithDistance = attractionsDatabase.map(attraction => {
       const distance = calculateDistance(
@@ -241,7 +254,7 @@ const RideService: React.FC = () => {
   };
 
   // 台灣特色景點資料庫 - 包含各地景點及其坐標
-  const attractionsDatabase = [
+  const attractionsDatabase: Attraction[] = [
     {
       name: "陽明山國家公園",
       latitude: 25.1559,
