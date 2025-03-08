@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import {
@@ -23,7 +23,86 @@ const Home = () => {
   const [isLoggingOut, setIsLoggingOut] = useState(false);
   const navigate = useNavigate();
   const theme = useTheme();
+  
+  // 用于存储用户当前位置
+  const [currentLocation, setCurrentLocation] = useState("正在获取位置...");
+  const [isLoadingLocation, setIsLoadingLocation] = useState(true);
 
+  // Google Maps API Key
+  const GOOGLE_MAPS_API_KEY = import.meta.env.VITE_GOOGLE_MAPS_API_KEY || "AIzaSyD0LlTAW3UbiCbRM8mE3dL9yHTDrEwAXOE";
+  
+  // 获取用户当前位置
+  useEffect(() => {
+    const getUserLocation = () => {
+      setIsLoadingLocation(true);
+      
+      // 检查浏览器是否支持地理位置
+      if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(
+          (position) => {
+            const { latitude, longitude } = position.coords;
+            
+            // 使用 Google Maps Geocoding API 将坐标转换为地址
+            fetch(`https://maps.googleapis.com/maps/api/geocode/json?latlng=${latitude},${longitude}&key=${GOOGLE_MAPS_API_KEY}&language=zh-TW`)
+              .then(response => response.json())
+              .then(data => {
+                if (data.status === "OK") {
+                  // 从结果中提取城市和区域信息
+                  const addressComponents = data.results[0].address_components;
+                  let city = "";
+                  let district = "";
+                  
+                  for (const component of addressComponents) {
+                    if (component.types.includes("administrative_area_level_1")) {
+                      city = component.short_name;
+                    }
+                    if (component.types.includes("administrative_area_level_3") || 
+                        component.types.includes("locality")) {
+                      district = component.short_name;
+                    }
+                  }
+                  
+                  // 设置当前位置
+                  if (city && district) {
+                    setCurrentLocation(`${city}${district}`);
+                  } else if (city) {
+                    setCurrentLocation(city);
+                  } else {
+                    setCurrentLocation("未知位置");
+                  }
+                } else {
+                  setCurrentLocation("无法获取位置");
+                  console.error("Google Maps Geocoding API 错误:", data.status);
+                }
+                setIsLoadingLocation(false);
+              })
+              .catch(error => {
+                console.error("获取地址时出错:", error);
+                setCurrentLocation("位置服务暂时不可用");
+                setIsLoadingLocation(false);
+              });
+          },
+          (error) => {
+            console.error("获取位置时出错:", error);
+            setCurrentLocation("无法获取位置");
+            setIsLoadingLocation(false);
+          },
+          { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+        );
+      } else {
+        setCurrentLocation("浏览器不支持位置服务");
+        setIsLoadingLocation(false);
+      }
+    };
+    
+    getUserLocation();
+    
+    // 每5分钟更新一次位置
+    const locationInterval = setInterval(getUserLocation, 5 * 60 * 1000);
+    
+    return () => clearInterval(locationInterval);
+  }, []);
+  
   // 自定義主題（實際使用中可以放在單獨的文件中）
   const kStyleGlobal = {
     colors: {
@@ -151,7 +230,11 @@ const Home = () => {
                   fontSize={"16px"}
                   fontWeight={"600"}
                 >
-                  台北市
+                  {isLoadingLocation ? (
+                    <Text as="span" color="gray.400">正在獲取位置...</Text>
+                  ) : (
+                    currentLocation
+                  )}
                 </Text>
               </Flex>
             </Flex>
@@ -411,7 +494,7 @@ const Home = () => {
         >
           <IconButton
             aria-label="首頁"
-            icon={<Icon as={FiMapPin} boxSize={8} />} /* 增大圖標 */
+            icon={<Icon as={FiMapPin} boxSize={18} />} /* 增大圖標至3倍 */
             variant="ghost"
             h="60px" /* 增加高度 */
             w="60px" /* 增加寬度 */
@@ -420,7 +503,7 @@ const Home = () => {
           />
           <IconButton
             aria-label="乘車"
-            icon={<Icon as={FaCar} boxSize={8} />} /* 增大圖標 */
+            icon={<Icon as={FaCar} boxSize={18} />} /* 增大圖標至3倍 */
             variant="ghost"
             h="60px" /* 增加高度 */
             w="60px" /* 增加寬度 */
@@ -428,7 +511,7 @@ const Home = () => {
           />
           <IconButton
             aria-label="行程"
-            icon={<Icon as={MdRoute} boxSize={8} />} /* 增大圖標 */
+            icon={<Icon as={MdRoute} boxSize={18} />} /* 增大圖標至3倍 */
             variant="ghost"
             h="60px" /* 增加高度 */
             w="60px" /* 增加寬度 */
@@ -436,7 +519,7 @@ const Home = () => {
           />
           <IconButton
             aria-label="設定"
-            icon={<Icon as={FiSettings} boxSize={8} />} /* 增大圖標 */
+            icon={<Icon as={FiSettings} boxSize={18} />} /* 增大圖標至3倍 */
             variant="ghost"
             h="60px" /* 增加高度 */
             w="60px" /* 增加寬度 */
