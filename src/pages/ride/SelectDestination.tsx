@@ -16,7 +16,6 @@ import {
   Icon,
   VStack,
   useToast,
-  Center,
   HStack
 } from '@chakra-ui/react';
 import { 
@@ -32,7 +31,7 @@ import {
   FiStar,
   FiClock as FiClockRecent
 } from 'react-icons/fi';
-import { motion } from 'framer-motion';
+// import { motion } from 'framer-motion';
 import BottomNavBar from '@/components/common/BottomNavBar';
 import Maps from '@/components/Maps';
 
@@ -111,8 +110,7 @@ const SelectDestination: React.FC = () => {
   const [routeCalculated, setRouteCalculated] = useState(false);
   const [showRecentLocations, setShowRecentLocations] = useState(true);
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [keyNext, setKeyNext] = useState(0);
-  const [keyPrev, setKeyPrev] = useState(0);
+  // These state variables will be used for swiper navigation in future implementation
   
   // 目的地選項數據
   const destinationData = [
