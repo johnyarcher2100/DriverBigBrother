@@ -170,8 +170,9 @@ const SelectDestination: React.FC = () => {
           const locationText = `台北市信義區 (${latitude.toFixed(4)}, ${longitude.toFixed(4)})`;
           setStartingLocation(locationText);
           
-                  // 設置地圖圖片URL - 使用 Google Maps Static API
-          setMapImageUrl(`https://maps.googleapis.com/maps/api/staticmap?center=${latitude},${longitude}&zoom=15&size=800x400&markers=color:red%7C${latitude},${longitude}&map_id=roadmap&key=YOUR_API_KEY`);
+          // 設置地圖圖片URL - 使用 Google Maps Static API
+          const apiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY || '';
+          setMapImageUrl(`https://maps.googleapis.com/maps/api/staticmap?center=${latitude},${longitude}&zoom=15&size=800x400&markers=color:red%7C${latitude},${longitude}&map_id=roadmap&key=${apiKey}`);
           
           setIsLoading(false);
         },
@@ -269,7 +270,7 @@ const SelectDestination: React.FC = () => {
           >
             {!isLoading && !locationError && mapImageUrl ? (
               <Image 
-                src={mapImageUrl.replace('YOUR_API_KEY', import.meta.env.VITE_GOOGLE_MAPS_API_KEY || '')} 
+                src={mapImageUrl} 
                 alt="初始位置地圖"
                 width="100%"
                 height="100%"
