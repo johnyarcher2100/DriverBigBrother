@@ -1,5 +1,5 @@
 /// <reference types="vite/client" />
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   Box,
@@ -61,6 +61,8 @@ const RideService: React.FC = () => {
   }
   
   const [nearbyAttractions, setNearbyAttractions] = useState<Attraction[]>([]);
+  const [allFilteredAttractions, setAllFilteredAttractions] = useState<Attraction[]>([]);
+  const rotationIntervalRef = useRef<number | null>(null);
   const navigate = useNavigate();
   const theme = useTheme();
   
@@ -188,7 +190,7 @@ const RideService: React.FC = () => {
       };
     });
     
-    // 篩選出30-60分鐘車程內的景點
+    // 篩選出15-60分鐘車程內的景點
     const nearbyAttractions = attractionsWithDistance
       .filter(attraction => 
         attraction.estimatedTimeInMinutes >= 15 && 
@@ -196,19 +198,51 @@ const RideService: React.FC = () => {
       )
       .sort((a, b) => a.estimatedTimeInMinutes - b.estimatedTimeInMinutes); // 按時間排序
     
-    // 如果沒有符合條件的景點，顯示最近的3個景點
-    const attractionsToShow = nearbyAttractions.length > 0 
-      ? nearbyAttractions.slice(0, 3) 
+    // 如果沒有符合條件的景點，顯示最近的所有景點
+    const filteredAttractions = nearbyAttractions.length > 0 
+      ? nearbyAttractions
       : attractionsWithDistance
-          .sort((a, b) => a.estimatedTimeInMinutes - b.estimatedTimeInMinutes)
-          .slice(0, 3);
+          .sort((a, b) => a.estimatedTimeInMinutes - b.estimatedTimeInMinutes);
     
-    setNearbyAttractions(attractionsToShow);
+    // 保存所有篩選後的景點供輪換使用
+    setAllFilteredAttractions(filteredAttractions);
+    
+    // 初始顯示前3個景點
+    rotateAttractions(filteredAttractions);
+  };
+  
+  // 輪換顯示景點
+  const rotateAttractions = (attractions: Attraction[] = allFilteredAttractions) => {
+    if (attractions.length === 0) return;
+    
+    // 隨機選擇起始索引，確保每次輪換都顯示不同的景點組合
+    const startIndex = Math.floor(Math.random() * attractions.length);
+    
+    // 從起始索引開始，選擇3個景點（如果不足則循環取值）
+    const selected = [];
+    for (let i = 0; i < 3; i++) {
+      const index = (startIndex + i) % attractions.length;
+      selected.push(attractions[index]);
+    }
+    
+    setNearbyAttractions(selected);
   };
   
   // 在組件載入時獲取用戶位置
   useEffect(() => {
     getUserLocation();
+    
+    // 設置每10分鐘輪換一次推薦景點
+    rotationIntervalRef.current = window.setInterval(() => {
+      rotateAttractions();
+    }, 10 * 60 * 1000); // 10分鐘 = 10 * 60 * 1000毫秒
+    
+    // 清理定時器
+    return () => {
+      if (rotationIntervalRef.current) {
+        clearInterval(rotationIntervalRef.current);
+      }
+    };
   }, [getUserLocation]);
 
   // 切换筛选器状态
@@ -494,8 +528,9 @@ const RideService: React.FC = () => {
                   fontSize={kStyleGlobal.fontSizes.sm}
                   color={kStyleGlobal.colors.primary[500]}
                   cursor={"pointer"}
+                  onClick={() => rotateAttractions()}
                 >
-                  查看全部
+                  換一批
                 </Text>
               </Flex>
               <Stack spacing={3}>
