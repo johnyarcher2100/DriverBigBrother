@@ -1,17 +1,15 @@
 /// <reference types="vite/client" />
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   Box,
   Flex,
   Text,
   Button,
-  IconButton,
   Input,
   InputGroup,
   InputLeftElement,
   InputRightElement,
-  Stack,
   Divider,
   ChakraProvider
 } from '@chakra-ui/react';
@@ -24,12 +22,57 @@ import {
   FiHome, 
   FiBriefcase, 
   FiMic,
-  FiClock as FiHistory,
-  FiRuler
+  FiClock as FiHistory
 } from 'react-icons/fi';
 import { motion } from 'framer-motion';
 import BottomNavBar from '@/components/common/BottomNavBar';
-import { kStyleGlobal } from '@/styles/globalStyles';
+// 定義全局樣式
+const kStyleGlobal = {
+  colors: {
+    primary: {
+      50: '#E6F6FF',
+      100: '#BAE3FF',
+      200: '#7CC4FA',
+      300: '#47A3F3',
+      400: '#2186EB',
+      500: '#0967D2',
+      600: '#0552B5',
+      700: '#03449E',
+      800: '#01337D',
+      900: '#002159',
+    },
+    gray: {
+      50: '#F7FAFC',
+      100: '#EDF2F7',
+      200: '#E2E8F0',
+      300: '#CBD5E0',
+      400: '#A0AEC0',
+      500: '#718096',
+      600: '#4A5568',
+      700: '#2D3748',
+      800: '#1A202C',
+      900: '#171923',
+    },
+    background: '#F7FAFC',
+    textColor: '#1A202C',
+  },
+  fontSizes: {
+    xs: '12px',
+    sm: '14px',
+    md: '16px',
+    lg: '18px',
+    xl: '20px',
+    '2xl': '24px',
+    '3xl': '28px',
+    '4xl': '36px',
+  },
+  fontWeights: {
+    normal: 400,
+    medium: 500,
+    semibold: 600,
+    bold: 700,
+  },
+};
 
 /**
  * 選擇目的地頁面
@@ -38,7 +81,7 @@ import { kStyleGlobal } from '@/styles/globalStyles';
 const SelectDestination: React.FC = () => {
   const navigate = useNavigate();
   const [destination, setDestination] = useState("");
-  const [currentLocation, setCurrentLocation] = useState("台北市信義區信義路五段7號");
+  const [currentLocation] = useState("台北市信義區信義路五段7號");
   
   // 處理返回功能
   const goBack = () => {
@@ -210,17 +253,18 @@ const SelectDestination: React.FC = () => {
           </Flex>
           
           {/* 底部滑入面板 */}
-          <Box
-            as={motion.div}
-            position={"absolute"}
-            bottom={0}
-            left={0}
-            right={0}
-            bg={"white"}
-            borderTopLeftRadius={"24px"}
-            borderTopRightRadius={"24px"}
-            p={"24px"}
-            boxShadow={"0 -4px 20px rgba(0,0,0,0.1)"}
+          <motion.div
+            style={{
+              position: "absolute",
+              bottom: 0,
+              left: 0,
+              right: 0,
+              background: "white",
+              borderTopLeftRadius: "24px",
+              borderTopRightRadius: "24px",
+              padding: "24px",
+              boxShadow: "0 -4px 20px rgba(0,0,0,0.1)"
+            }}
             initial={{ y: 300 }}
             animate={{ y: 0 }}
             transition={{
@@ -304,7 +348,7 @@ const SelectDestination: React.FC = () => {
                     alignItems={"center"}
                     gap={3}
                   >
-                    <FiRuler
+                    <FiClock
                       size={20}
                       color={kStyleGlobal.colors.primary[500]}
                     />
@@ -333,7 +377,7 @@ const SelectDestination: React.FC = () => {
                 確認目的地
               </Button>
             </Flex>
-          </Box>
+          </motion.div>
         </Flex>
         
         {/* 底部導航欄 */}
