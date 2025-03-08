@@ -88,25 +88,28 @@ const RideService: React.FC = () => {
     }
   };
 
-  // 推荐路线数据
+  // 推荐特色景点路线数据
   const recommendedRoutes = [
     {
-      start: "台北車站",
-      end: "台北101",
+      start: "目前位置",
+      end: "陽明山國家公園",
       time: "25分鐘",
-      price: "NT$250"
+      price: "NT$320",
+      description: "擁有豐富的火山地形和溫泉資源，春季賞花、夏季避暑的絕佳去處，遠離城市喧囂。"
     },
     {
-      start: "信義商圈",
-      end: "松山機場",
-      time: "20分鐘",
-      price: "NT$200"
-    },
-    {
-      start: "西門町",
-      end: "南港展覽館",
+      start: "目前位置",
+      end: "九份老街",
       time: "30分鐘",
-      price: "NT$300"
+      price: "NT$380",
+      description: "充滿懷舊氛圍的山城，紅燈籠點綴的石板路，品嚐道地小吃，欣賞絕美海景。"
+    },
+    {
+      start: "目前位置",
+      end: "象山步道",
+      time: "20分鐘",
+      price: "NT$220",
+      description: "台北市區最佳觀景點，輕鬆健行即可俯瞰101與台北盆地，夜景尤其壯觀。"
     }
   ];
 
@@ -151,6 +154,36 @@ const RideService: React.FC = () => {
           />
         </Flex>
 
+        {/* 搜索框 - 移到頂部導航欄下方 */}
+        <Box px={4} py={3} bg="white" borderBottomWidth={1} borderColor="gray.100">
+          <InputGroup>
+            <InputLeftElement
+              pointerEvents={"none"}
+              pl={4}
+            >
+              <FiSearch
+                size={20}
+                color={kStyleGlobal.colors.gray[400]}
+              />
+            </InputLeftElement>
+            <Input
+              pl={12}
+              placeholder={"您要去哪裡？"}
+              bg={"white"}
+              h={"54px"}
+              fontSize={"md"}
+              borderRadius={"xl"}
+              boxShadow={"md"}
+              _focus={{
+                borderColor: "primary.500"
+              }}
+              onClick={() => {
+                goToNavigation("/select-destination");
+              }}
+            />
+          </InputGroup>
+        </Box>
+
         {/* 主要内容区域 */}
         <Box flex={1} pb={"140px"}>
           {/* 顶部图片区域 */}
@@ -180,37 +213,9 @@ const RideService: React.FC = () => {
             px={4}
             py={6}
             gap={6}
-            mt={-20}
             position={"relative"}
             zIndex={1}
           >
-            {/* 搜索框 */}
-            <InputGroup>
-              <InputLeftElement
-                pointerEvents={"none"}
-                pl={4}
-              >
-                <FiSearch
-                  size={20}
-                  color={kStyleGlobal.colors.gray[400]}
-                />
-              </InputLeftElement>
-              <Input
-                pl={12}
-                placeholder={"您要去哪裡？"}
-                bg={"white"}
-                h={"54px"}
-                fontSize={"md"}
-                borderRadius={"xl"}
-                boxShadow={"lg"}
-                _focus={{
-                  borderColor: "primary.500"
-                }}
-                onClick={() => {
-                  goToNavigation("/select-destination");
-                }}
-              />
-            </InputGroup>
 
             {/* 快捷按钮 */}
             <Flex
@@ -289,7 +294,7 @@ const RideService: React.FC = () => {
                   fontSize={kStyleGlobal.fontSizes.lg}
                   fontWeight={kStyleGlobal.fontWeights.bold}
                 >
-                  推薦路線
+                  推薦景點
                 </Text>
                 <Text
                   fontSize={kStyleGlobal.fontSizes.sm}
@@ -343,6 +348,16 @@ const RideService: React.FC = () => {
                           {route.end}
                         </Text>
                       </Flex>
+                      
+                      {/* 添加景點描述 */}
+                      <Text
+                        fontSize={kStyleGlobal.fontSizes.sm}
+                        color={kStyleGlobal.colors.gray[600]}
+                        noOfLines={2}
+                      >
+                        {route.description}
+                      </Text>
+                      
                       <Flex
                         justify={"space-between"}
                         align={"center"}
