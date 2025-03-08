@@ -1,6 +1,7 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import Register from './pages/auth/Register';
 import Login from './pages/auth/Login';
+import LoginError from './pages/auth/LoginError';
 import Home from './pages/Home';
 import LoadingScreen from './components/LoadingScreen';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
@@ -34,6 +35,7 @@ const AppRoutes = () => {
       <Route path="/" element={user ? <Navigate to="/home" replace /> : <Navigate to="/login" replace />} />
       <Route path="/register" element={user ? <Navigate to="/home" replace /> : <Register />} />
       <Route path="/login" element={user ? <Navigate to="/home" replace /> : <Login />} />
+      <Route path="/auth/login-error" element={<LoginError />} />
       
       {/* Protected routes */}
       <Route path="/home" element={

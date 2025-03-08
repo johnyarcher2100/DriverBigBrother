@@ -28,7 +28,14 @@ const Home = () => {
   const kStyleGlobal = {
     colors: {
       primary: {
-        500: '#3182CE' // 使用Chakra UI的藍色作為主色調
+        500: '#2C5282' // 改為更沉穩的深藍色
+      },
+      secondary: {
+        500: '#4A5568' // 深灰色調
+      },
+      background: {
+        main: '#F7FAFC', // 深色背景
+        card: '#FFFFFF'
       }
     }
   };
@@ -109,15 +116,15 @@ const Home = () => {
     <ChakraProvider theme={theme}>
       <Flex
         direction={"column"}
-        bg={"gray.50"}
+        bg={kStyleGlobal.colors.background.main}
         minH={"100vh"}
       >
         {/* 頂部區域 */}
         <Box
-          bg={"white"}
+          bg={kStyleGlobal.colors.background.card}
           p={6}
           borderBottomRadius={"2xl"}
-          boxShadow={"sm"}
+          boxShadow={"md"}
         >
           <Flex
             justify={"space-between"}
@@ -179,7 +186,7 @@ const Home = () => {
               borderRadius={"2xl"}
               onClick={() => goToNavigation("/ride-service")}
               _hover={{
-                bg: 'blue.600'
+                bg: 'blue.700'
               }}
             >
               <Flex
@@ -350,10 +357,10 @@ const Home = () => {
                 <Box
                   key={index}
                   minW={"280px"}
-                  bg={"white"}
+                  bg={kStyleGlobal.colors.background.card}
                   borderRadius={"2xl"}
                   overflow={"hidden"}
-                  boxShadow={"sm"}
+                  boxShadow={"md"}
                 >
                   <Image
                     src={service.image}
@@ -394,8 +401,9 @@ const Home = () => {
         {/* 底部導航欄 */}
         <Flex
           as="nav"
-          bg="white"
-          p={3}
+          bg={kStyleGlobal.colors.background.card}
+          p={6} /* 增加填充 */
+          py={5} /* 垂直方向的填充 */
           justifyContent="space-around"
           borderTop="1px"
           borderColor="gray.200"
@@ -403,27 +411,35 @@ const Home = () => {
         >
           <IconButton
             aria-label="首頁"
-            icon={<Icon as={FiMapPin} />}
+            icon={<Icon as={FiMapPin} boxSize={6} />} /* 增大圖標 */
             variant="ghost"
+            h="60px" /* 增加高度 */
+            w="60px" /* 增加寬度 */
             isActive={true}
             onClick={() => goToNavigation("/")}
           />
           <IconButton
             aria-label="乘車"
-            icon={<Icon as={FaCar} />}
+            icon={<Icon as={FaCar} boxSize={6} />} /* 增大圖標 */
             variant="ghost"
+            h="60px" /* 增加高度 */
+            w="60px" /* 增加寬度 */
             onClick={() => goToNavigation("/ride-service")}
           />
           <IconButton
             aria-label="行程"
-            icon={<Icon as={MdRoute} />}
+            icon={<Icon as={MdRoute} boxSize={6} />} /* 增大圖標 */
             variant="ghost"
+            h="60px" /* 增加高度 */
+            w="60px" /* 增加寬度 */
             onClick={() => goToNavigation("/trip-history")}
           />
           <IconButton
             aria-label="設定"
-            icon={<Icon as={FiSettings} />}
+            icon={<Icon as={FiSettings} boxSize={6} />} /* 增大圖標 */
             variant="ghost"
+            h="60px" /* 增加高度 */
+            w="60px" /* 增加寬度 */
             onClick={() => goToNavigation("/settings")}
           />
         </Flex>

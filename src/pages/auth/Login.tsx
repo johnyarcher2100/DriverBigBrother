@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { 
   ChevronLeft, 
   Mail, 
@@ -18,6 +19,7 @@ import { useAuth } from '@/contexts/AuthContext';
 
 const Login = () => {
   const { signIn, signInWithSocial } = useAuth();
+  const navigate = useNavigate();
   
   // State management
   const [email, setEmail] = useState('');
@@ -49,6 +51,17 @@ const Login = () => {
       // Login successful - the auth state will automatically update and redirect
     } catch (error: any) {
       console.error('Login error:', error);
+      
+      // 判断是否是严重错误，如果是则重定向到错误页面
+      if (error.message?.includes('account_locked') || 
+          error.message?.includes('server_error') || 
+          error.message?.includes('network_error')) {
+        const errorType = error.message.includes('account_locked') ? 'account_locked' : 
+                         error.message.includes('server_error') ? 'server_error' : 'network_error';
+        navigate(`/auth/login-error?type=${errorType}`);
+        return;
+      }
+      
       setErrorMessage(error.message || '登入過程中發生錯誤，請稍後再試');
     } finally {
       setIsSubmitting(false);
@@ -72,15 +85,20 @@ const Login = () => {
       // Social login successful - will redirect automatically
     } catch (error: any) {
       console.error(`${provider} login error:`, error);
-      // 处理 Google OAuth 错误
-      if (error.message?.includes('redirect_uri_mismatch')) {
-        setErrorMessage(`無法使用${provider}登入，重定向 URI 不匹配`);
-        setErrorDetails('技術詳情：OAuth 重定向 URI 不符合 Google 開發者控制台中的設定。若問題持續，請聯繫客服。');
+      // 判断是否需要重定向到错误页面
+      if (error.message?.includes('redirect_uri_mismatch') || 
+          error.message?.includes('popup_blocked') || 
+          error.message?.includes('server_error')) {
+        // 严重错误，重定向到错误页面
+        const errorType = error.message.includes('redirect_uri_mismatch') ? 'redirect_uri_mismatch' : 
+                         error.message.includes('popup_blocked') ? 'popup_blocked' : 'server_error';
+        navigate(`/auth/login-error?type=${errorType}&provider=${provider}`);
+        return;
       } else if (error.message?.includes('popup_closed')) {
+        // 较轻微的错误，直接在当前页面显示
         setErrorMessage(`${provider}登入被取消，您關閉了登入視窗`);
-      } else if (error.message?.includes('popup_blocked')) {
-        setErrorMessage(`瀏覽器阻止了${provider}登入視窗，請允許彈出視窗`);
       } else {
+        // 其他错误
         setErrorMessage(error.message || `社交媒體登入失敗，請稍後再試`);
         if (error.message) {
           setErrorDetails(`錯誤詳情：${error.message}`);
