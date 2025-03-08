@@ -11,7 +11,8 @@ import {
   InputLeftElement,
   InputRightElement,
   Divider,
-  ChakraProvider
+  ChakraProvider,
+  Image
 } from '@chakra-ui/react';
 import { 
   FiChevronLeft, 
@@ -81,7 +82,7 @@ const kStyleGlobal = {
 const SelectDestination: React.FC = () => {
   const navigate = useNavigate();
   const [destination, setDestination] = useState("");
-  const [currentLocation, setCurrentLocation] = useState("正在獲取您的位置...");
+  const [startingLocation, setStartingLocation] = useState("正在獲取起始位置...");
   const [estimatedTime, setEstimatedTime] = useState("--");
   const [distance, setDistance] = useState("--");
   const [isLoading, setIsLoading] = useState(true);
@@ -89,6 +90,7 @@ const SelectDestination: React.FC = () => {
   const [userCoords, setUserCoords] = useState({ lat: 0, lng: 0 });
   const [destinationEntered, setDestinationEntered] = useState(false);
   const [routeCalculated, setRouteCalculated] = useState(false);
+  const [mapImageUrl, setMapImageUrl] = useState("");
   
   // 處理返回功能
   const goBack = () => {
@@ -164,16 +166,20 @@ const SelectDestination: React.FC = () => {
           // 設置座標以便路線計算
           setUserCoords({ lat: latitude, lng: longitude });
           
-          // 這裡應該調用地理編碼API將經緯度轉換為地址
-          // 為了示例，我們使用簡單字符串
-          setCurrentLocation(`台北市信義區 (${latitude.toFixed(4)}, ${longitude.toFixed(4)})`); 
+          // 設置起始位置
+          const locationText = `台北市信義區 (${latitude.toFixed(4)}, ${longitude.toFixed(4)})`;
+          setStartingLocation(locationText);
+          
+                  // 設置地圖圖片URL - 使用 Google Maps Static API
+          setMapImageUrl(`https://maps.googleapis.com/maps/api/staticmap?center=${latitude},${longitude}&zoom=15&size=800x400&markers=color:red%7C${latitude},${longitude}&map_id=roadmap&key=YOUR_API_KEY`);
+          
           setIsLoading(false);
         },
         (error) => {
           // 處理位置獲取錯誤
           console.error("獲取位置失敗:", error.message);
           setLocationError(`無法獲取您的位置: ${error.message}`);
-          setCurrentLocation("位置未知");
+          setStartingLocation("位置未知");
           setIsLoading(false);
         },
         {
@@ -184,7 +190,7 @@ const SelectDestination: React.FC = () => {
       );
     } else {
       setLocationError("您的瀏覽器不支持地理位置功能");
-      setCurrentLocation("位置未知");
+      setStartingLocation("位置未知");
       setIsLoading(false);
     }
   }, []);
@@ -253,21 +259,54 @@ const SelectDestination: React.FC = () => {
           flex={1}
           position={"relative"}
         >
-          {/* 假設這裡是地圖組件 */}
+          {/* 顯示用戶初始位置地圖 */}
           <Box
             width={"100%"}
-            height={"100%"}
+            height={"200px"}
+            overflow={"hidden"}
             bg={"gray.100"}
-          />
+            position={"relative"}
+          >
+            {!isLoading && !locationError && mapImageUrl ? (
+              <Image 
+                src={mapImageUrl.replace('YOUR_API_KEY', import.meta.env.VITE_GOOGLE_MAPS_API_KEY || '')} 
+                alt="初始位置地圖"
+                width="100%"
+                height="100%"
+                objectFit="cover"
+              />
+            ) : isLoading ? (
+              <Flex 
+                width="100%" 
+                height="100%" 
+                justifyContent="center" 
+                alignItems="center"
+              >
+                <Text>正在加載地圖...</Text>
+              </Flex>
+            ) : (
+              <Flex 
+                width="100%" 
+                height="100%" 
+                justifyContent="center" 
+                alignItems="center"
+                bg="gray.200"
+              >
+                <Text color="gray.500">無法加載地圖</Text>
+              </Flex>
+            )}
+          </Box>
           
           {/* 搜索與快速選項 */}
           <Flex
-            position={"absolute"}
-            top={4}
-            left={4}
-            right={4}
+            mt={4}
+            mx={4}
             direction={"column"}
             gap={4}
+            bg={"white"}
+            p={4}
+            borderRadius={"lg"}
+            shadow={"md"}
           >
             <InputGroup size={"lg"}>
               <InputLeftElement
@@ -368,7 +407,7 @@ const SelectDestination: React.FC = () => {
               direction={"column"}
               gap={6}
             >
-              {/* 目前位置 */}
+              {/* 起始位置 */}
               <Flex
                 alignItems={"center"}
                 gap={4}
@@ -392,7 +431,7 @@ const SelectDestination: React.FC = () => {
                     fontSize={kStyleGlobal.fontSizes.sm}
                     color={kStyleGlobal.colors.gray[500]}
                   >
-                    目前位置
+                    起始位置
                   </Text>
                   <Text
                     fontSize={kStyleGlobal.fontSizes.md}
@@ -401,9 +440,9 @@ const SelectDestination: React.FC = () => {
                     {locationError ? (
                       <Text color="red.500">{locationError}</Text>
                     ) : isLoading ? (
-                      <Text color="gray.500">正在獲取您的位置...</Text>
+                      <Text color="gray.500">正在獲取起始位置...</Text>
                     ) : (
-                      currentLocation
+                      startingLocation
                     )}
                   </Text>
                 </Flex>
