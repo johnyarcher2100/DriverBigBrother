@@ -227,6 +227,12 @@ const Login = () => {
             <Divider className="w-[60px]" />
           </div>
 
+          {/* 社交登录警示信息 */}
+          <div className="w-full p-3 bg-amber-50 border border-amber-200 rounded-lg text-center">
+            <p className="text-amber-700 text-sm font-medium mb-1">社交媒體登入功能暫時關閉</p>
+            <p className="text-amber-600 text-xs">Facebook 和 Apple 登入功能正在升級中，目前僅支持 Google 登入和電子郵件登入</p>
+          </div>
+
           <div className="flex gap-6">
             <Button 
               variant="outline" 
@@ -240,20 +246,20 @@ const Login = () => {
             <Button 
               variant="outline" 
               size="icon"
-              className="rounded-full border-gray-200 hover:bg-gray-50 h-12 w-12"
-              onClick={() => handleSocialLogin('facebook')}
-              disabled={isSubmitting}
+              className="rounded-full border-gray-200 hover:bg-gray-50 h-12 w-12 opacity-50 cursor-not-allowed"
+              onClick={() => setErrorMessage("Facebook 登入功能暫時關閉，正在升級中，敬請期待！")}
+              disabled={true}
             >
-              <BrandFacebook size={22} className="text-[#1877F2]" />
+              <BrandFacebook size={22} className="text-gray-400" />
             </Button>
             <Button 
               variant="outline" 
               size="icon"
-              className="rounded-full border-gray-200 hover:bg-gray-50 h-12 w-12"
-              onClick={() => handleSocialLogin('apple')}
-              disabled={isSubmitting}
+              className="rounded-full border-gray-200 hover:bg-gray-50 h-12 w-12 opacity-50 cursor-not-allowed"
+              onClick={() => setErrorMessage("Apple 登入功能暫時關閉，正在升級中，敬請期待！")}
+              disabled={true}
             >
-              <BrandApple size={22} className="text-gray-700" />
+              <BrandApple size={22} className="text-gray-400" />
             </Button>
           </div>
 

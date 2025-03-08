@@ -37,30 +37,62 @@ const Home = () => {
   useEffect(() => {
     const getUserLocation = () => {
       setIsLoadingLocation(true);
+      console.log("开始获取位置...");
       
       // 检查浏览器是否支持地理位置
       if (navigator.geolocation) {
         navigator.geolocation.getCurrentPosition(
           (position) => {
             const { latitude, longitude } = position.coords;
+            console.log("成功获取坐标:", latitude, longitude);
             
             // 使用 Google Maps Geocoding API 将坐标转换为地址
-            fetch(`https://maps.googleapis.com/maps/api/geocode/json?latlng=${latitude},${longitude}&key=${GOOGLE_MAPS_API_KEY}&language=zh-TW`)
+            const geocodingUrl = `https://maps.googleapis.com/maps/api/geocode/json?latlng=${latitude},${longitude}&key=${GOOGLE_MAPS_API_KEY}&language=zh-TW`;
+            console.log("请求 Geocoding API:", geocodingUrl);
+            
+            fetch(geocodingUrl)
               .then(response => response.json())
               .then(data => {
-                if (data.status === "OK") {
+                console.log("Geocoding API 响应:", data);
+                
+                if (data.status === "OK" && data.results && data.results.length > 0) {
                   // 从结果中提取城市和区域信息
                   const addressComponents = data.results[0].address_components;
+                  console.log("地址组件:", addressComponents);
+                  
                   let city = "";
                   let district = "";
                   
+                  // 台湾地区地址解析逻辑
                   for (const component of addressComponents) {
-                    if (component.types.includes("administrative_area_level_1")) {
+                    // 市/县 (如台北市、新北市)
+                    if (component.types.includes("administrative_area_level_1") || 
+                        component.types.includes("locality")) {
                       city = component.short_name;
                     }
-                    if (component.types.includes("administrative_area_level_3") || 
-                        component.types.includes("locality")) {
+                    
+                    // 区/镇 (如信义区、中正区)
+                    if (component.types.includes("administrative_area_level_2") || 
+                        component.types.includes("administrative_area_level_3") || 
+                        component.types.includes("sublocality_level_1")) {
                       district = component.short_name;
+                    }
+                  }
+                  
+                  console.log("解析后的位置:", { city, district });
+                  
+                  // 如果没有找到合适的城市和区域，尝试使用格式化地址
+                  if (!city && !district) {
+                    const formattedAddress = data.results[0].formatted_address;
+                    console.log("使用格式化地址:", formattedAddress);
+                    
+                    // 尝试从格式化地址中提取位置信息
+                    const addressParts = formattedAddress.split(',');
+                    if (addressParts.length >= 2) {
+                      // 使用格式化地址的前两部分
+                      setCurrentLocation(addressParts[0].trim());
+                      setIsLoadingLocation(false);
+                      return;
                     }
                   }
                   
@@ -69,41 +101,63 @@ const Home = () => {
                     setCurrentLocation(`${city}${district}`);
                   } else if (city) {
                     setCurrentLocation(city);
+                  } else if (district) {
+                    setCurrentLocation(district);
                   } else {
-                    setCurrentLocation("未知位置");
+                    // 如果仍然无法获取位置，使用第一个结果的格式化地址
+                    const formattedAddress = data.results[0].formatted_address;
+                    const shortAddress = formattedAddress.split(',')[0];
+                    setCurrentLocation(shortAddress || "未知位置");
                   }
                 } else {
-                  setCurrentLocation("无法获取位置");
                   console.error("Google Maps Geocoding API 错误:", data.status);
+                  setCurrentLocation("無法獲取位置");
                 }
                 setIsLoadingLocation(false);
               })
               .catch(error => {
                 console.error("获取地址时出错:", error);
-                setCurrentLocation("位置服务暂时不可用");
+                setCurrentLocation("位置服務暫時不可用");
                 setIsLoadingLocation(false);
               });
           },
           (error) => {
-            console.error("获取位置时出错:", error);
-            setCurrentLocation("无法获取位置");
+            console.error("获取位置时出错:", error.code, error.message);
+            let errorMsg = "無法獲取位置";
+            
+            // 根据错误代码提供更具体的错误信息
+            switch(error.code) {
+              case error.PERMISSION_DENIED:
+                errorMsg = "位置權限被拒絕";
+                break;
+              case error.POSITION_UNAVAILABLE:
+                errorMsg = "位置信息不可用";
+                break;
+              case error.TIMEOUT:
+                errorMsg = "獲取位置超時";
+                break;
+            }
+            
+            setCurrentLocation(errorMsg);
             setIsLoadingLocation(false);
           },
-          { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+          { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 }
         );
       } else {
-        setCurrentLocation("浏览器不支持位置服务");
+        console.error("浏览器不支持位置服务");
+        setCurrentLocation("瀏覽器不支持位置服務");
         setIsLoadingLocation(false);
       }
     };
     
+    // 立即获取位置
     getUserLocation();
     
     // 每5分钟更新一次位置
     const locationInterval = setInterval(getUserLocation, 5 * 60 * 1000);
     
     return () => clearInterval(locationInterval);
-  }, []);
+  }, [GOOGLE_MAPS_API_KEY]);
   
   // 自定義主題（實際使用中可以放在單獨的文件中）
   const kStyleGlobal = {

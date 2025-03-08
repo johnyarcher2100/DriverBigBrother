@@ -35,9 +35,42 @@ export const signInWithEmail = async (email: string, password: string) => {
 };
 
 export const signInWithProvider = async (provider: 'google' | 'facebook' | 'apple') => {
+  // 获取当前域名作为重定向基础 URL
+  const redirectBase = window.location.origin;
+  
+  // 根据不同的提供商配置不同的选项
+  let options: any = {};
+  
+  if (provider === 'facebook') {
+    console.log('Facebook 登录开始，重定向 URL 基础:', redirectBase);
+    
+    // 使用更详细的 Facebook 登录配置
+    options = {
+      redirectTo: `${redirectBase}/auth/callback`,
+      scopes: 'email,public_profile',
+      queryParams: {
+        display: 'popup',  // 使用弹窗模式
+        auth_type: 'rerequest',  // 强制重新请求权限
+        response_type: 'code'  // 使用授权码流程
+      }
+    };
+    
+    // 记录完整的重定向 URL 以便调试
+    console.log('Facebook 完整重定向 URL:', `${redirectBase}/auth/callback`);
+  }
+  
+  // 使用 OAuth 登录
   const { data, error } = await supabase.auth.signInWithOAuth({
     provider,
+    options: options
   });
+  
+  // 记录登录结果
+  if (error) {
+    console.error(`${provider} 登录错误:`, error);
+  } else {
+    console.log(`${provider} 登录成功:`, data);
+  }
   
   return { data, error };
 };
