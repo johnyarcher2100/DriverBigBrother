@@ -5,6 +5,7 @@ import LoginError from './pages/auth/LoginError';
 import Callback from './pages/auth/Callback';
 import Home from './pages/Home';
 import RideService from './pages/ride/RideService';
+import SelectDestination from './pages/ride/SelectDestination';
 import LoadingScreen from './components/LoadingScreen';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 
@@ -50,6 +51,12 @@ const AppRoutes = () => {
       <Route path="/ride-service" element={
         <ProtectedRoute>
           <RideService />
+        </ProtectedRoute>
+      } />
+      
+      <Route path="/select-destination" element={
+        <ProtectedRoute>
+          <SelectDestination />
         </ProtectedRoute>
       } />
       
