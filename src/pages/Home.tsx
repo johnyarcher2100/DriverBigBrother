@@ -411,7 +411,7 @@ const Home = () => {
         >
           <IconButton
             aria-label="首頁"
-            icon={<Icon as={FiMapPin} boxSize={6} />} /* 增大圖標 */
+            icon={<Icon as={FiMapPin} boxSize={8} />} /* 增大圖標 */
             variant="ghost"
             h="60px" /* 增加高度 */
             w="60px" /* 增加寬度 */
@@ -420,7 +420,7 @@ const Home = () => {
           />
           <IconButton
             aria-label="乘車"
-            icon={<Icon as={FaCar} boxSize={6} />} /* 增大圖標 */
+            icon={<Icon as={FaCar} boxSize={8} />} /* 增大圖標 */
             variant="ghost"
             h="60px" /* 增加高度 */
             w="60px" /* 增加寬度 */
@@ -428,7 +428,7 @@ const Home = () => {
           />
           <IconButton
             aria-label="行程"
-            icon={<Icon as={MdRoute} boxSize={6} />} /* 增大圖標 */
+            icon={<Icon as={MdRoute} boxSize={8} />} /* 增大圖標 */
             variant="ghost"
             h="60px" /* 增加高度 */
             w="60px" /* 增加寬度 */
@@ -436,7 +436,7 @@ const Home = () => {
           />
           <IconButton
             aria-label="設定"
-            icon={<Icon as={FiSettings} boxSize={6} />} /* 增大圖標 */
+            icon={<Icon as={FiSettings} boxSize={8} />} /* 增大圖標 */
             variant="ghost"
             h="60px" /* 增加高度 */
             w="60px" /* 增加寬度 */
