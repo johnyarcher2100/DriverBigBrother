@@ -1,5 +1,5 @@
 /// <reference types="vite/client" />
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   Box,
@@ -81,7 +81,11 @@ const kStyleGlobal = {
 const SelectDestination: React.FC = () => {
   const navigate = useNavigate();
   const [destination, setDestination] = useState("");
-  const [currentLocation] = useState("台北市信義區信義路五段7號");
+  const [currentLocation, setCurrentLocation] = useState("正在獲取您的位置...");
+  const [estimatedTime, setEstimatedTime] = useState("--");
+  const [distance, setDistance] = useState("--");
+  const [isLoading, setIsLoading] = useState(true);
+  const [locationError, setLocationError] = useState("");
   
   // 處理返回功能
   const goBack = () => {
@@ -105,6 +109,44 @@ const SelectDestination: React.FC = () => {
   const handleDestinationChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setDestination(e.target.value);
   };
+  
+  // 獲取用戶當前位置
+  useEffect(() => {
+    if (navigator.geolocation) {
+      setIsLoading(true);
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          // 成功獲取位置
+          const { latitude, longitude } = position.coords;
+          // 這裡應該調用地理編碼API將經緯度轉換為地址
+          // 為了示例，我們使用簡單字符串
+          setCurrentLocation(`台北市信義區 (${latitude.toFixed(4)}, ${longitude.toFixed(4)})`); 
+          
+          // 模擬計算預估時間和距離
+          // 在實際應用中，應使用地圖API計算
+          setEstimatedTime("15");
+          setDistance("3.2");
+          setIsLoading(false);
+        },
+        (error) => {
+          // 處理位置獲取錯誤
+          console.error("獲取位置失敗:", error.message);
+          setLocationError(`無法獲取您的位置: ${error.message}`);
+          setCurrentLocation("位置未知");
+          setIsLoading(false);
+        },
+        {
+          enableHighAccuracy: true,
+          timeout: 10000,
+          maximumAge: 0
+        }
+      );
+    } else {
+      setLocationError("您的瀏覽器不支持地理位置功能");
+      setCurrentLocation("位置未知");
+      setIsLoading(false);
+    }
+  }, []);
   
   return (
     <ChakraProvider theme={kStyleGlobal}>
@@ -306,7 +348,13 @@ const SelectDestination: React.FC = () => {
                     fontSize={kStyleGlobal.fontSizes.md}
                     fontWeight={kStyleGlobal.fontWeights.medium}
                   >
-                    {currentLocation}
+                    {locationError ? (
+                      <Text color="red.500">{locationError}</Text>
+                    ) : isLoading ? (
+                      <Text color="gray.500">正在獲取您的位置...</Text>
+                    ) : (
+                      currentLocation
+                    )}
                   </Text>
                 </Flex>
               </Flex>
@@ -341,7 +389,7 @@ const SelectDestination: React.FC = () => {
                     <Text
                       fontSize={kStyleGlobal.fontSizes.md}
                     >
-                      預估時間: 15 分鐘
+                      預估時間: {estimatedTime} 分鐘
                     </Text>
                   </Flex>
                   <Flex
@@ -355,7 +403,7 @@ const SelectDestination: React.FC = () => {
                     <Text
                       fontSize={kStyleGlobal.fontSizes.md}
                     >
-                      距離: 3.2 公里
+                      距離: {distance} 公里
                     </Text>
                   </Flex>
                 </Flex>
