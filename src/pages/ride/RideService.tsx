@@ -88,27 +88,27 @@ const RideService: React.FC = () => {
     }
   };
 
-  // 推荐特色景点路线数据
+  // 推荐特色景点路线数据 - 使用 DeepSeek 估算的更精確時間和價格
   const recommendedRoutes = [
     {
       start: "目前位置",
       end: "陽明山國家公園",
-      time: "25分鐘",
-      price: "NT$320",
+      time: "35-45分鐘",
+      price: "NT$350-420",
       description: "擁有豐富的火山地形和溫泉資源，春季賞花、夏季避暑的絕佳去處，遠離城市喧囂。"
     },
     {
       start: "目前位置",
       end: "九份老街",
-      time: "30分鐘",
-      price: "NT$380",
+      time: "40-50分鐘",
+      price: "NT$450-520",
       description: "充滿懷舊氛圍的山城，紅燈籠點綴的石板路，品嚐道地小吃，欣賞絕美海景。"
     },
     {
       start: "目前位置",
       end: "象山步道",
-      time: "20分鐘",
-      price: "NT$220",
+      time: "15-25分鐘",
+      price: "NT$180-250",
       description: "台北市區最佳觀景點，輕鬆健行即可俯瞰101與台北盆地，夜景尤其壯觀。"
     }
   ];
