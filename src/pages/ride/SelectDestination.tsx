@@ -1,5 +1,5 @@
 /// <reference types="vite/client" />
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   Box,
@@ -86,6 +86,9 @@ const SelectDestination: React.FC = () => {
   const [distance, setDistance] = useState("--");
   const [isLoading, setIsLoading] = useState(true);
   const [locationError, setLocationError] = useState("");
+  const [userCoords, setUserCoords] = useState({ lat: 0, lng: 0 });
+  const [destinationEntered, setDestinationEntered] = useState(false);
+  const [routeCalculated, setRouteCalculated] = useState(false);
   
   // 處理返回功能
   const goBack = () => {
@@ -108,6 +111,46 @@ const SelectDestination: React.FC = () => {
   // 處理目的地變更
   const handleDestinationChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setDestination(e.target.value);
+    if (e.target.value.length > 0) {
+      setDestinationEntered(true);
+    } else {
+      setDestinationEntered(false);
+      setRouteCalculated(false);
+    }
+  };
+  
+  // 計算路線
+  const calculateRoute = useCallback(() => {
+    if (!destination || userCoords.lat === 0 || userCoords.lng === 0) return;
+    
+    // 在實際應用中，應使用 Google Maps Directions API 獲取路線計算
+    // 但為了示例，這裡模擬計算時間和距離
+    // 根據目的地的長度隨機生成一個時間和距離
+    const hash = destination.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
+    const randomTime = (hash % 20) + 10; // 10-30分鐘
+    const randomDistance = ((hash % 50) + 10) / 10; // 1.0-6.0公里
+    
+    setEstimatedTime(randomTime.toString());
+    setDistance(randomDistance.toFixed(1));
+    setRouteCalculated(true);
+  }, [destination, userCoords]);
+  
+  // 處理快捷選項點擊
+  const handleLocationSelect = (label: string) => {
+    // 模擬預設位置
+    const presetLocations = {
+      "家": "台北市大安區復興南路一段36號",
+      "公司": "台北市山北區明德路131號",
+      "收藏": "台北市信義區市府路45號",
+      "最近": "台北市南港區市場路凯施路口"
+    };
+    
+    const selectedLocation = presetLocations[label as keyof typeof presetLocations] || "";
+    setDestination(selectedLocation);
+    if (selectedLocation) {
+      setDestinationEntered(true);
+      calculateRoute();
+    }
   };
   
   // 獲取用戶當前位置
@@ -118,14 +161,12 @@ const SelectDestination: React.FC = () => {
         (position) => {
           // 成功獲取位置
           const { latitude, longitude } = position.coords;
+          // 設置座標以便路線計算
+          setUserCoords({ lat: latitude, lng: longitude });
+          
           // 這裡應該調用地理編碼API將經緯度轉換為地址
           // 為了示例，我們使用簡單字符串
           setCurrentLocation(`台北市信義區 (${latitude.toFixed(4)}, ${longitude.toFixed(4)})`); 
-          
-          // 模擬計算預估時間和距離
-          // 在實際應用中，應使用地圖API計算
-          setEstimatedTime("15");
-          setDistance("3.2");
           setIsLoading(false);
         },
         (error) => {
@@ -147,6 +188,13 @@ const SelectDestination: React.FC = () => {
       setIsLoading(false);
     }
   }, []);
+  
+  // 目的地輸入變更後計算路線
+  useEffect(() => {
+    if (destinationEntered && !isLoading && !locationError) {
+      calculateRoute();
+    }
+  }, [destinationEntered, isLoading, locationError, calculateRoute]);
   
   return (
     <ChakraProvider theme={kStyleGlobal}>
@@ -242,6 +290,7 @@ const SelectDestination: React.FC = () => {
                 shadow={"lg"}
                 value={destination}
                 onChange={handleDestinationChange}
+                onBlur={() => destination && calculateRoute()}
                 _placeholder={{
                   color: "gray.400"
                 }}
@@ -282,6 +331,7 @@ const SelectDestination: React.FC = () => {
                     <FiHistory size={18} />
                   }
                   borderRadius={"full"}
+                  onClick={() => handleLocationSelect(item.label)}
                   _hover={{
                     transform: "translateY(-1px)",
                     shadow: "lg"
@@ -412,13 +462,14 @@ const SelectDestination: React.FC = () => {
               {/* 確認按鈕 */}
               <Button
                 size={"lg"}
-                bg={"primary.500"}
+                bg={destinationEntered && routeCalculated ? "primary.500" : "gray.400"}
                 color={"white"}
                 h={"56px"}
                 fontSize={"md"}
                 fontWeight={"semibold"}
+                isDisabled={!destinationEntered || !routeCalculated}
                 _hover={{
-                  bg: "primary.600"
+                  bg: destinationEntered && routeCalculated ? "primary.600" : "gray.400"
                 }}
                 onClick={() => goToNavigation("/select-car-type")}
               >
