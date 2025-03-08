@@ -12,7 +12,12 @@ import {
   InputRightElement,
   Divider,
   ChakraProvider,
-  Image
+  Image,
+  Icon,
+  VStack,
+  useToast,
+  Center,
+  HStack
 } from '@chakra-ui/react';
 import { 
   FiChevronLeft, 
@@ -21,12 +26,16 @@ import {
   FiClock, 
   FiHome, 
   FiBriefcase, 
-  FiMic
+  FiMic,
+  FiX,
+  FiNavigation,
+  FiStar,
+  FiClock as FiClockRecent
 } from 'react-icons/fi';
 import { motion } from 'framer-motion';
-import { FiAward, FiMonitor, FiPackage } from 'react-icons/fi';
-import { RiHotelLine } from 'react-icons/ri';
 import BottomNavBar from '@/components/common/BottomNavBar';
+import Maps from '@/components/Maps';
+
 // 定義全局樣式
 const kStyleGlobal = {
   colors: {
@@ -90,6 +99,7 @@ const kStyleGlobal = {
  */
 const SelectDestination: React.FC = () => {
   const navigate = useNavigate();
+  const toast = useToast();
   const [destination, setDestination] = useState("");
   const [startingLocation, setStartingLocation] = useState("正在獲取起始位置...");
   const [estimatedTime, setEstimatedTime] = useState("--");
@@ -99,26 +109,79 @@ const SelectDestination: React.FC = () => {
   const [userCoords, setUserCoords] = useState({ lat: 0, lng: 0 });
   const [destinationEntered, setDestinationEntered] = useState(false);
   const [routeCalculated, setRouteCalculated] = useState(false);
-  const [mapImageUrl, setMapImageUrl] = useState("");
+  const [showRecentLocations, setShowRecentLocations] = useState(true);
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const [keyNext, setKeyNext] = useState(0);
+  const [keyPrev, setKeyPrev] = useState(0);
+  
+  // 目的地選項數據
+  const destinationData = [
+    {
+      "title": "附近熱門",
+      "description": "探索您附近的熱門目的地",
+      "image": "https://images.unsplash.com/photo-1449965408869-eaa3f722e40d",
+      "buttonText": "選擇目的地"
+    },
+    {
+      "title": "商業區域",
+      "description": "前往主要商業區和辦公地點",
+      "image": "https://images.unsplash.com/photo-1494976388531-d1058494cdd8",
+      "buttonText": "選擇目的地"
+    },
+    {
+      "title": "休閒娛樂",
+      "description": "前往購物中心、電影院和餐廳",
+      "image": "https://images.unsplash.com/photo-1549317661-bd32c8ce0db2",
+      "buttonText": "選擇目的地"
+    },
+    {
+      "title": "觀光景點",
+      "description": "探索城市的主要觀光景點",
+      "image": "https://images.unsplash.com/photo-1580273916550-e323be2ae537",
+      "buttonText": "選擇目的地"
+    }
+  ];
   
   // 處理返回功能
   const goBack = () => {
     navigate(-1);
   };
   
-  // 處理導航到其他頁面
-  const goToNavigation = (path: string) => {
-    navigate(path);
+  // 導航到確認頁面
+  const goToConfirmation = () => {
+    if (!destination) {
+      toast({
+        title: "請選擇目的地",
+        status: "warning",
+        duration: 2000,
+        isClosable: true,
+      });
+      return;
+    }
+    
+    navigate('/ride/confirm', { 
+      state: { 
+        startingLocation, 
+        destination, 
+        estimatedTime, 
+        distance 
+      } 
+    });
   };
   
-  // 預設位置清單
-  const savedLocations = [
-    { icon: "award", label: "VIP 接送", type: "premium" },
-    { icon: "airplay", label: "松山機場", type: "premium" },
-    { icon: "hotel", label: "五星酒店", type: "premium" },
-    { icon: "briefcase", label: "商務中心", type: "premium" },
-    { icon: "home", label: "家", type: "standard" },
-    { icon: "building", label: "公司", type: "standard" }
+  // 快速選擇位置列表
+  const quickLocations = [
+    { icon: FiHome, label: "家", address: "台北市大安區復興南路一段36號" },
+    { icon: FiBriefcase, label: "公司", address: "台北市信義區松仁路100號" },
+    { icon: FiStar, label: "收藏", address: "台北市信義區市府路45號" },
+    { icon: FiClockRecent, label: "最近", address: "台北市南港區研究院路二段128號" }
+  ];
+  
+  // 最近位置列表
+  const recentLocations = [
+    { name: "台北101", address: "台北市信義區信義路五段7號", time: "昨天" },
+    { name: "松山機場", address: "台北市松山區敦化北路340號", time: "3天前" },
+    { name: "台北車站", address: "台北市中正區北平西路3號", time: "上週" }
   ];
   
   // 處理目的地變更
@@ -126,10 +189,45 @@ const SelectDestination: React.FC = () => {
     setDestination(e.target.value);
     if (e.target.value.length > 0) {
       setDestinationEntered(true);
+      setShowRecentLocations(false);
     } else {
       setDestinationEntered(false);
       setRouteCalculated(false);
+      setShowRecentLocations(true);
     }
+  };
+  
+  // 清除目的地
+  const clearDestination = () => {
+    setDestination("");
+    setDestinationEntered(false);
+    setRouteCalculated(false);
+    setShowRecentLocations(true);
+  };
+  
+  // 處理語音輸入
+  const handleVoiceInput = () => {
+    toast({
+      title: "語音輸入功能",
+      description: "此功能尚未實現，敬請期待",
+      status: "info",
+      duration: 2000,
+      isClosable: true,
+    });
+  };
+  
+  // 處理快速位置選擇
+  const handleQuickLocationSelect = (address: string) => {
+    setDestination(address);
+    setDestinationEntered(true);
+    setShowRecentLocations(false);
+  };
+  
+  // 處理最近位置選擇
+  const handleRecentLocationSelect = (address: string) => {
+    setDestination(address);
+    setDestinationEntered(true);
+    setShowRecentLocations(false);
   };
   
   // 計算路線
@@ -148,414 +246,386 @@ const SelectDestination: React.FC = () => {
     setRouteCalculated(true);
   }, [destination, userCoords]);
   
-  // 處理快捷選項點擊
-  const handleLocationSelect = (label: string) => {
-    // 模擬預設位置
-    const presetLocations = {
-      "家": "台北市大安區復興南路一段36號",
-      "公司": "台北市山北區明德路131號",
-      "收藏": "台北市信義區市府路45號",
-      "最近": "台北市南港區市場路凯施路口"
-    };
-    
-    const selectedLocation = presetLocations[label as keyof typeof presetLocations] || "";
-    setDestination(selectedLocation);
-    if (selectedLocation) {
-      setDestinationEntered(true);
-      calculateRoute();
-    }
-  };
-  
-  // 獲取用戶當前位置
+  // 獲取用戶位置
   useEffect(() => {
     if (navigator.geolocation) {
-      setIsLoading(true);
       navigator.geolocation.getCurrentPosition(
         (position) => {
-          // 成功獲取位置
           const { latitude, longitude } = position.coords;
-          // 設置座標以便路線計算
           setUserCoords({ lat: latitude, lng: longitude });
           
-          // 設置起始位置
-          const locationText = `台北市信義區 (${latitude.toFixed(4)}, ${longitude.toFixed(4)})`;
-          setStartingLocation(locationText);
-          
-          // 設置地圖圖片URL - 使用 Google Maps Static API
-          const apiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY || '';
-          setMapImageUrl(`https://maps.googleapis.com/maps/api/staticmap?center=${latitude},${longitude}&zoom=14&size=800x600&scale=2&maptype=hybrid&markers=color:red%7C${latitude},${longitude}&map_id=roadmap&key=${apiKey}`);
-          
+          // 使用反向地理編碼獲取地址
+          // 在實際應用中，應使用 Google Maps Geocoding API
+          // 這裡為了示例，使用固定地址
+          setStartingLocation("台北市信義區松智路17號");
           setIsLoading(false);
         },
         (error) => {
-          // 處理位置獲取錯誤
-          console.error("獲取位置失敗:", error.message);
-          setLocationError(`無法獲取您的位置: ${error.message}`);
-          setStartingLocation("位置未知");
+          console.error("Error getting location:", error);
+          setLocationError("無法獲取您的位置，請檢查位置權限設置");
+          setStartingLocation("無法獲取位置");
           setIsLoading(false);
         },
-        {
-          enableHighAccuracy: true,
-          timeout: 10000,
-          maximumAge: 0
-        }
+        { enableHighAccuracy: true, timeout: 15000, maximumAge: 10000 }
       );
     } else {
-      setLocationError("無法使用定位服務，請確認您的權限設定");
-      setStartingLocation("位置未知");
+      setLocationError("您的瀏覽器不支持地理位置功能");
+      setStartingLocation("無法獲取位置");
       setIsLoading(false);
     }
   }, []);
-  
-  // 目的地輸入變更後計算路線
+
+  // 當目的地輸入後，自動計算路線
   useEffect(() => {
-    if (destinationEntered && !isLoading && !locationError) {
+    if (destination && destinationEntered && userCoords.lat !== 0 && userCoords.lng !== 0) {
       calculateRoute();
     }
-  }, [destinationEntered, isLoading, locationError, calculateRoute]);
-  
+  }, [destination, destinationEntered, userCoords, calculateRoute]);
+
   return (
     <ChakraProvider theme={kStyleGlobal}>
-      <Flex
-        direction={"column"}
+      <Box 
+        position={"relative"}
         h={"100vh"}
         bg={kStyleGlobal.colors.background}
       >
         {/* 頂部導航欄 */}
-        <Flex
-          px={6}
-          py={4}
-          justifyContent={"space-between"}
-          alignItems={"center"}
-          bg={"white"}
-          borderBottomWidth={1}
-          borderColor={"gray.100"}
-          position={"sticky"}
-          top={0}
-          zIndex={10}
+        <Flex 
+          as="header" 
+          align="center" 
+          justify="space-between" 
+          p={4} 
+          borderBottom="1px" 
+          borderColor="gray.200"
+          position="relative"
+          zIndex={1}
         >
-          <Button
-            variant={"ghost"}
+          <Button 
+            variant="ghost" 
+            leftIcon={<FiChevronLeft />} 
             onClick={goBack}
+            p={2}
           >
-            <FiChevronLeft
-              size={24}
-              color={kStyleGlobal.colors.textColor}
-            />
+            返回
           </Button>
-          <Text
-            fontSize={kStyleGlobal.fontSizes.lg}
-            fontWeight={kStyleGlobal.fontWeights.semibold}
-            color={kStyleGlobal.colors.textColor}
-          >
-            尊榮接送服務
-          </Text>
-          <Button
-            variant={"ghost"}
-            isDisabled={true}
-            _disabled={{
-              opacity: 0.4
-            }}
-          >
-            <Text
-              fontSize={kStyleGlobal.fontSizes.md}
-            >
-              完成
-            </Text>
-          </Button>
+          <Text fontWeight="bold" fontSize="lg">選擇目的地</Text>
+          <Box w="40px"></Box> {/* 為了平衡布局 */}
         </Flex>
         
-        {/* 地圖與搜索區域 */}
-        <Flex
-          direction={"column"}
-          flex={1}
-          position={"relative"}
-        >
-          {/* 顯示用戶初始位置地圖 */}
-          <Box
-            width={"100%"}
-            height={"300px"}
-            overflow={"hidden"}
-            bg={"gray.100"}
-            position={"relative"}
-            borderRadius={"xl"}
-            boxShadow={"2xl"}
-          >
-            {!isLoading && !locationError && mapImageUrl ? (
-              <Image 
-                src={mapImageUrl} 
-                alt="您的專屬接送地圖"
-                width="100%"
-                height="100%"
-                objectFit="cover"
-              />
-            ) : isLoading ? (
-              <Flex 
-                width="100%" 
-                height="100%" 
-                justifyContent="center" 
-                alignItems="center"
-              >
-                <Text>正在為您準備專屬地圖...</Text>
-              </Flex>
-            ) : (
-              <Flex 
-                width="100%" 
-                height="100%" 
-                justifyContent="center" 
-                alignItems="center"
-                bg="gray.200"
-              >
-                <Text color="gray.500">暫時無法顯示地圖，請稍後再試</Text>
-              </Flex>
-            )}
-          </Box>
-          
-          {/* 搜索與快速選項 */}
-          <Flex
-            mt={4}
-            mx={4}
-            direction={"column"}
-            gap={4}
-            bg={"white"}
-            p={4}
-            borderRadius={"lg"}
-            shadow="xl" bgGradient={kStyleGlobal.colors.premium.gradient} _hover={{ transform: 'translateY(-2px)', shadow: '2xl' }} transition="all 0.3s ease-in-out"
-          >
-            <InputGroup size={"lg"}>
-              <InputLeftElement
-                pointerEvents={"none"}
-                pl={4}
-              >
-                <FiSearch
-                  size={20}
-                  color={"gray.400"}
-                />
+        {/* 主要內容 */}
+        {destinationEntered ? (
+          <Box p={4}>
+            {/* 起始位置 */}
+            <Flex 
+              align="center" 
+              mb={4} 
+              p={3} 
+              bg="gray.50" 
+              borderRadius="md"
+            >
+              <Icon as={FiMapPin} color="green.500" boxSize={5} mr={3} />
+              <Box flex="1">
+                <Text fontSize="xs" color="gray.500">起點</Text>
+                <Text fontWeight="medium">
+                  {isLoading ? "正在獲取位置..." : startingLocation}
+                </Text>
+                {locationError && <Text color="red.500" fontSize="xs">{locationError}</Text>}
+              </Box>
+            </Flex>
+            
+            {/* 目的地輸入 */}
+            <InputGroup size="lg" mb={4}>
+              <InputLeftElement pointerEvents="none">
+                <Icon as={FiSearch} color="gray.500" />
               </InputLeftElement>
-              <Input
-                bg={"white"}
-                placeholder={"請輸入您的目的地"}
-                fontSize={"md"}
-                sx={{
-                  borderWidth: 2,
-                  borderColor: "premium.100",
-                  _placeholder: { color: "gray.400" },
-                  _focus: {
-                    borderColor: "premium.500",
-                    boxShadow: "0 0 0 1px " + kStyleGlobal.colors.premium[500]
-                  }
-                }}
-                pl={12}
-                pr={12}
-                h={"54px"}
-                borderRadius={"full"}
-                shadow={"lg"}
+              <Input 
+                placeholder="輸入目的地" 
                 value={destination}
                 onChange={handleDestinationChange}
-                onBlur={() => destination && calculateRoute()}
-                _placeholder={{
-                  color: "gray.400"
-                }}
-                _focus={{
-                  borderColor: "primary.500"
-                }}
+                borderRadius="full"
+                bg="gray.100"
+                _focus={{ bg: "white", borderColor: "blue.400", boxShadow: "0 0 0 1px #63B3ED" }}
               />
-              <InputRightElement pr={4}>
-                <FiMic
-                  size={20}
-                  color={"gray.400"}
-                />
-              </InputRightElement>
+              {destination && (
+                <InputRightElement width="4.5rem">
+                  <HStack spacing={2}>
+                    <Icon 
+                      as={FiMic} 
+                      color="gray.500" 
+                      cursor="pointer" 
+                      onClick={handleVoiceInput}
+                    />
+                    <Icon 
+                      as={FiX} 
+                      color="gray.500" 
+                      cursor="pointer" 
+                      onClick={clearDestination}
+                    />
+                  </HStack>
+                </InputRightElement>
+              )}
             </InputGroup>
             
-            {/* 快速選項按鈕 */}
-            <Flex
-              overflowX={"auto"}
-              gap={3}
-              pb={2}
-              css={{
-                "&::-webkit-scrollbar": {
-                  display: "none"
-                }
-              }}
-            >
-              {savedLocations.map((item, index) => (
-                <Button
-                  key={index}
-                  bg={"white"}
-                  px={6}
-                  py={3}
-                  shadow="xl" bgGradient={kStyleGlobal.colors.premium.gradient} _hover={{ transform: 'translateY(-2px)', shadow: '2xl' }} transition="all 0.3s ease-in-out"
-                  leftIcon={
-                    item.icon === "award" ? <FiAward size={18} color={kStyleGlobal.colors.gold} /> :
-                    item.icon === "airplay" ? <FiMonitor size={18} /> :
-                    item.icon === "hotel" ? <RiHotelLine size={18} /> :
-                    item.icon === "briefcase" ? <FiPackage size={18} /> :
-                    item.icon === "home" ? <FiHome size={18} /> :
-                    <FiBriefcase size={18} />
-                  }
-                  borderRadius={"full"}
-                  onClick={() => handleLocationSelect(item.label)}
-                  sx={{
-                    transition: "all 0.2s",
-                    _hover: {
-                      transform: item.type === "premium" ? "translateY(-2px)" : "translateY(-1px)",
-                      shadow: item.type === "premium" ? "2xl" : "lg",
-                      bg: item.type === "premium" ? "premium.50" : "white"
-                    }
-                  }}
+            {/* 快速選擇位置 */}
+            <Flex justify="space-between" mb={6}>
+              {quickLocations.map((location, index) => (
+                <VStack 
+                  key={index} 
+                  spacing={1} 
+                  cursor="pointer" 
+                  onClick={() => handleQuickLocationSelect(location.address)}
                 >
-                  {item.label}
-                </Button>
+                  <Flex 
+                    justify="center" 
+                    align="center" 
+                    w="50px" 
+                    h="50px" 
+                    bg="blue.50" 
+                    color="blue.500" 
+                    borderRadius="full"
+                  >
+                    <Icon as={location.icon} boxSize={5} />
+                  </Flex>
+                  <Text fontSize="xs" fontWeight="medium">{location.label}</Text>
+                </VStack>
               ))}
             </Flex>
-          </Flex>
-          
-          {/* 底部滑入面板 */}
-          <motion.div
-            style={{
-              position: "absolute",
-              bottom: 0,
-              left: 0,
-              right: 0,
-              background: "white",
-              borderTopLeftRadius: "24px",
-              borderTopRightRadius: "24px",
-              padding: "24px",
-              boxShadow: "0 -4px 20px rgba(0,0,0,0.1)"
-            }}
-            initial={{ y: 300 }}
-            animate={{ y: 0 }}
-            transition={{
-              type: "spring",
-              stiffness: 300,
-              damping: 20,
-              mass: 1
-            }}
-          >
-            <Flex
-              direction={"column"}
-              gap={6}
-            >
-              {/* 起始位置 */}
-              <Flex
-                alignItems={"center"}
-                gap={4}
-              >
-                <Box
-                  p={3}
-                  bgGradient={kStyleGlobal.colors.premium.gradient}
-                  borderRadius={"full"}
+            
+            <Divider mb={4} />
+            
+            {/* 顯示路線計算結果或最近位置 */}
+            {routeCalculated ? (
+              <Box>
+                <Flex justify="space-between" mb={4}>
+                  <Box>
+                    <Text fontSize="sm" color="gray.500">預計時間</Text>
+                    <Flex align="center">
+                      <Icon as={FiClock} color="blue.500" mr={1} />
+                      <Text fontWeight="bold">{estimatedTime} 分鐘</Text>
+                    </Flex>
+                  </Box>
+                  <Box>
+                    <Text fontSize="sm" color="gray.500">距離</Text>
+                    <Flex align="center">
+                      <Icon as={FiNavigation} color="blue.500" mr={1} />
+                      <Text fontWeight="bold">{distance} 公里</Text>
+                    </Flex>
+                  </Box>
+                  <Box>
+                    <Button 
+                      colorScheme="blue" 
+                      size="sm" 
+                      rightIcon={<FiChevronLeft transform="rotate(180deg)" />}
+                      onClick={goToConfirmation}
+                    >
+                      確認
+                    </Button>
+                  </Box>
+                </Flex>
+                
+                {/* 地圖顯示 */}
+                <Box 
+                  borderRadius="lg" 
+                  overflow="hidden" 
+                  h="200px" 
+                  mb={4}
+                  boxShadow="md"
                 >
-                  <FiMapPin
-                    size={24}
-                    color={kStyleGlobal.colors.premium[500]}
+                  <Maps 
+                    style={{ width: '100%', height: '100%' }} 
+                    userCoords={userCoords} 
                   />
                 </Box>
-                <Flex
-                  direction={"column"}
-                  flex={1}
-                  gap={1}
-                >
-                  <Text
-                    fontSize={kStyleGlobal.fontSizes.sm}
-                    color={kStyleGlobal.colors.gray[500]}
-                  >
-                    起始位置
-                  </Text>
-                  <Text
-                    fontSize={kStyleGlobal.fontSizes.md}
-                    fontWeight={kStyleGlobal.fontWeights.medium}
-                  >
-                    {locationError ? (
-                      <Text color="red.500">{locationError}</Text>
-                    ) : isLoading ? (
-                      <Text color="gray.500">正在獲取起始位置...</Text>
-                    ) : (
-                      startingLocation
-                    )}
-                  </Text>
-                </Flex>
-              </Flex>
-              
-              <Divider />
-              
-              {/* 預估資訊 */}
-              <Flex
-                direction={"column"}
-                gap={4}
+              </Box>
+            ) : (
+              showRecentLocations && (
+                <Box>
+                  <Text fontWeight="semibold" mb={3}>最近位置</Text>
+                  <VStack spacing={3} align="stretch">
+                    {recentLocations.map((location, index) => (
+                      <Flex 
+                        key={index} 
+                        align="center" 
+                        p={3} 
+                        bg="gray.50" 
+                        borderRadius="md"
+                        cursor="pointer"
+                        onClick={() => handleRecentLocationSelect(location.address)}
+                        _hover={{ bg: "gray.100" }}
+                      >
+                        <Icon as={FiClockRecent} color="gray.500" boxSize={5} mr={3} />
+                        <Box flex="1">
+                          <Text fontWeight="medium">{location.name}</Text>
+                          <Text fontSize="xs" color="gray.500">{location.address}</Text>
+                        </Box>
+                        <Text fontSize="xs" color="gray.400">{location.time}</Text>
+                      </Flex>
+                    ))}
+                  </VStack>
+                </Box>
+              )
+            )}
+          </Box>
+        ) : (
+          // 當未輸入目的地時，顯示滑動選擇界面
+          <Box>
+            {/* 跳過按鈕 */}
+            <Flex
+              position={"absolute"}
+              top={6}
+              right={6}
+              zIndex={2}
+            >
+              <Button
+                variant={"ghost"}
+                onClick={() => {
+                  navigate("/login");
+                }}
+                _hover={{
+                  bg: "rgba(0,0,0,0.05)"
+                }}
               >
                 <Text
-                  fontSize={kStyleGlobal.fontSizes.lg}
-                  fontWeight={kStyleGlobal.fontWeights.semibold}
+                  fontSize={"16px"}
+                  fontWeight={"500"}
+                  color={kStyleGlobal.colors.gray[600]}
                 >
-                  預估資訊
+                  跳過
                 </Text>
-                <Flex
-                  justifyContent={"space-between"}
-                  bg={"premium.50"}
-borderWidth={1}
-borderColor={"premium.100"}
-                  p={4}
-                  borderRadius={"xl"}
-                >
-                  <Flex
-                    alignItems={"center"}
-                    gap={3}
-                  >
-                    <FiClock
-                      size={20}
-                      color={kStyleGlobal.colors.premium[500]}
-                    />
-                    <Text
-                      fontSize={kStyleGlobal.fontSizes.md}
-                    >
-                      預計接送時間: {estimatedTime} 分鐘
-                    </Text>
-                  </Flex>
-                  <Flex
-                    alignItems={"center"}
-                    gap={3}
-                  >
-                    <FiClock
-                      size={20}
-                      color={kStyleGlobal.colors.premium[500]}
-                    />
-                    <Text
-                      fontSize={kStyleGlobal.fontSizes.md}
-                    >
-                      預計行駛距離: {distance} 公里
-                    </Text>
-                  </Flex>
-                </Flex>
-              </Flex>
-              
-              {/* 確認按鈕 */}
-              <Button
-                size={"lg"}
-                color={"white"}
-                h={"56px"}
-                fontSize={"md"}
-                fontWeight={"semibold"}
-                isDisabled={!destinationEntered || !routeCalculated}
-                sx={{
-                  bgGradient: destinationEntered && routeCalculated ? kStyleGlobal.colors.premium.gradient : "linear-gradient(135deg, #A0AEC0 0%, #718096 100%)",
-                  _hover: {
-                    transform: destinationEntered && routeCalculated ? 'translateY(-2px)' : 'none',
-                    bg: destinationEntered && routeCalculated ? "primary.600" : "gray.400"
-                  }
-                }}
-                onClick={() => goToNavigation("/select-car-type")}
-              >
-                確認尊榮接送
               </Button>
             </Flex>
-          </motion.div>
-        </Flex>
+            
+            {/* 滑動選擇界面 */}
+            <Box
+              as="div"
+              className="swiper-container"
+              h="100%"
+              position="relative"
+            >
+              <Box
+                as="div"
+                className="swiper-wrapper"
+                h="100%"
+              >
+                {destinationData.map((item, index) => (
+                  <Flex
+                    key={index}
+                    direction={"column"}
+                    h={"100%"}
+                    justify={"space-between"}
+                    align={"center"}
+                    px={6}
+                    py={20}
+                    className={`swiper-slide ${currentIndex === index ? 'swiper-slide-active' : ''}`}
+                  >
+                    <Box
+                      position={"relative"}
+                      w={"100%"}
+                      h={"45vh"}
+                      overflow={"hidden"}
+                      borderRadius={"3xl"}
+                      boxShadow={"xl"}
+                    >
+                      <Image
+                        src={item.image}
+                        alt={item.title}
+                        w="100%"
+                        h="100%"
+                        objectFit="cover"
+                      />
+                    </Box>
+                    <Flex
+                      direction={"column"}
+                      align={"center"}
+                      mt={10}
+                      mb={6}
+                      gap={4}
+                    >
+                      <Text
+                        fontSize={"32px"}
+                        fontWeight={"700"}
+                        textAlign={"center"}
+                        bgGradient="linear(135deg, #000000 0%, #333333 100%)"
+                        bgClip="text"
+                      >
+                        {item.title}
+                      </Text>
+                      <Text
+                        fontSize={"16px"}
+                        color={kStyleGlobal.colors.gray[600]}
+                        textAlign={"center"}
+                        maxW={"300px"}
+                        lineHeight={"1.6"}
+                      >
+                        {item.description}
+                      </Text>
+                    </Flex>
+                    <Button
+                      size={"lg"}
+                      w={"full"}
+                      maxW={"320px"}
+                      h={"56px"}
+                      borderRadius={"full"}
+                      bg={"black"}
+                      color={"white"}
+                      onClick={() => {
+                        setDestinationEntered(true);
+                        // 根據當前索引設置不同的預設目的地
+                        const destinations = [
+                          "台北市信義區松智路17號",
+                          "台北市信義區松仁路100號",
+                          "台北市信義區松壽路12號",
+                          "台北市信義區信義路五段7號"
+                        ];
+                        setDestination(destinations[index]);
+                      }}
+                      _hover={{
+                        transform: "translateY(-1px)",
+                        boxShadow: "lg"
+                      }}
+                      transition={"all 0.2s"}
+                    >
+                      <Text
+                        fontSize={"17px"}
+                        fontWeight={"600"}
+                      >
+                        {item.buttonText}
+                      </Text>
+                    </Button>
+                  </Flex>
+                ))}
+              </Box>
+              
+              {/* 導航點 */}
+              <Flex
+                position="absolute"
+                bottom="10px"
+                left="0"
+                right="0"
+                justify="center"
+                zIndex={2}
+              >
+                {destinationData.map((_, index) => (
+                  <Box
+                    key={index}
+                    w={currentIndex === index ? "20px" : "6px"}
+                    h="6px"
+                    borderRadius="3px"
+                    bg={currentIndex === index ? kStyleGlobal.colors.primary[500] : "rgba(0,0,0,0.1)"}
+                    mx="4px"
+                    transition="all 0.3s"
+                    onClick={() => setCurrentIndex(index)}
+                    cursor="pointer"
+                  />
+                ))}
+              </Flex>
+            </Box>
+          </Box>
+        )}
         
         {/* 底部導航欄 */}
         <BottomNavBar />
-      </Flex>
+      </Box>
     </ChakraProvider>
   );
 };
