@@ -31,7 +31,7 @@ import {
   FiStar, 
   FiHome, 
   FiBriefcase, 
-  FiAdjustments,
+  FiSliders,
   FiArrowRight
 } from 'react-icons/fi';
 import BottomNavBar from '@/components/common/BottomNavBar';
@@ -145,7 +145,7 @@ const RideService: React.FC = () => {
           </Text>
           <IconButton
             variant={"ghost"}
-            icon={<FiAdjustments size={24} />}
+            icon={<FiSliders size={24} />}
             aria-label={"筛选"}
             onClick={toggleFilter}
           />
