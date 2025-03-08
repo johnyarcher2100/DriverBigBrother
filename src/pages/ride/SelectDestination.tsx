@@ -19,14 +19,12 @@ import {
   FiSearch, 
   FiMapPin, 
   FiClock, 
-  FiStar, 
   FiHome, 
   FiBriefcase, 
-  FiMic,
-  FiClock as FiHistory
+  FiMic
 } from 'react-icons/fi';
-import { motion, AnimatePresence } from 'framer-motion';
-import { FiCrown, FiPlane, FiPackage } from 'react-icons/fi';
+import { motion } from 'framer-motion';
+import { FiAward, FiMonitor, FiPackage } from 'react-icons/fi';
 import { RiHotelLine } from 'react-icons/ri';
 import BottomNavBar from '@/components/common/BottomNavBar';
 // 定義全局樣式
@@ -115,8 +113,8 @@ const SelectDestination: React.FC = () => {
   
   // 預設位置清單
   const savedLocations = [
-    { icon: "crown", label: "VIP 接送", type: "premium" },
-    { icon: "plane", label: "松山機場", type: "premium" },
+    { icon: "award", label: "VIP 接送", type: "premium" },
+    { icon: "airplay", label: "松山機場", type: "premium" },
     { icon: "hotel", label: "五星酒店", type: "premium" },
     { icon: "briefcase", label: "商務中心", type: "premium" },
     { icon: "home", label: "家", type: "standard" },
@@ -337,15 +335,16 @@ const SelectDestination: React.FC = () => {
               <Input
                 bg={"white"}
                 placeholder={"請輸入您的目的地"}
-                _placeholder={{ color: "gray.400" }}
                 fontSize={"md"}
-                borderWidth={2}
-                borderColor={"premium.100"}
-                _focus={{
-                  borderColor: "premium.500",
-                  boxShadow: "0 0 0 1px " + kStyleGlobal.colors.premium[500]
+                sx={{
+                  borderWidth: 2,
+                  borderColor: "premium.100",
+                  _placeholder: { color: "gray.400" },
+                  _focus: {
+                    borderColor: "premium.500",
+                    boxShadow: "0 0 0 1px " + kStyleGlobal.colors.premium[500]
+                  }
                 }}
-                fontSize={"md"}
                 pl={12}
                 pr={12}
                 h={"54px"}
@@ -388,8 +387,8 @@ const SelectDestination: React.FC = () => {
                   py={3}
                   shadow="xl" bgGradient={kStyleGlobal.colors.premium.gradient} _hover={{ transform: 'translateY(-2px)', shadow: '2xl' }} transition="all 0.3s ease-in-out"
                   leftIcon={
-                    item.icon === "crown" ? <FiCrown size={18} color={kStyleGlobal.colors.gold} /> :
-                    item.icon === "plane" ? <FiPlane size={18} /> :
+                    item.icon === "award" ? <FiAward size={18} color={kStyleGlobal.colors.gold} /> :
+                    item.icon === "airplay" ? <FiMonitor size={18} /> :
                     item.icon === "hotel" ? <RiHotelLine size={18} /> :
                     item.icon === "briefcase" ? <FiPackage size={18} /> :
                     item.icon === "home" ? <FiHome size={18} /> :
@@ -397,12 +396,14 @@ const SelectDestination: React.FC = () => {
                   }
                   borderRadius={"full"}
                   onClick={() => handleLocationSelect(item.label)}
-                  _hover={{
-                    transform: item.type === "premium" ? "translateY(-2px)" : "translateY(-1px)",
-                    shadow: item.type === "premium" ? "2xl" : "lg",
-                    bg: item.type === "premium" ? "premium.50" : "white"
+                  sx={{
+                    transition: "all 0.2s",
+                    _hover: {
+                      transform: item.type === "premium" ? "translateY(-2px)" : "translateY(-1px)",
+                      shadow: item.type === "premium" ? "2xl" : "lg",
+                      bg: item.type === "premium" ? "premium.50" : "white"
+                    }
                   }}
-                  transition={"all 0.2s"}
                 >
                   {item.label}
                 </Button>
@@ -532,14 +533,17 @@ borderColor={"premium.100"}
               {/* 確認按鈕 */}
               <Button
                 size={"lg"}
-                bgGradient={destinationEntered && routeCalculated ? kStyleGlobal.colors.premium.gradient : "linear-gradient(135deg, #A0AEC0 0%, #718096 100%)"} _hover={{ transform: destinationEntered && routeCalculated ? 'translateY(-2px)' : 'none' }}
                 color={"white"}
                 h={"56px"}
                 fontSize={"md"}
                 fontWeight={"semibold"}
                 isDisabled={!destinationEntered || !routeCalculated}
-                _hover={{
-                  bg: destinationEntered && routeCalculated ? "primary.600" : "gray.400"
+                sx={{
+                  bgGradient: destinationEntered && routeCalculated ? kStyleGlobal.colors.premium.gradient : "linear-gradient(135deg, #A0AEC0 0%, #718096 100%)",
+                  _hover: {
+                    transform: destinationEntered && routeCalculated ? 'translateY(-2px)' : 'none',
+                    bg: destinationEntered && routeCalculated ? "primary.600" : "gray.400"
+                  }
                 }}
                 onClick={() => goToNavigation("/select-car-type")}
               >
