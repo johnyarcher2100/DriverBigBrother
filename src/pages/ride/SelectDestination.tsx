@@ -112,240 +112,33 @@ const SelectDestination: React.FC = () => {
   const [currentIndex, setCurrentIndex] = useState(0);
   // These state variables will be used for swiper navigation in future implementation
   
-  // 定義景點類型
-  interface Attraction {
-    name: string;
-    latitude: number;
-    longitude: number;
-    description: string;
-    category: string;
-    distance?: number;
-    time?: string;
-    price?: string;
-    estimatedTimeInMinutes?: number;
-  }
-
-  // 台灣特色景點資料庫 - 包含各地景點及其坐標和類別
-  const attractionsDatabase: Attraction[] = [
-    {
-      name: "陽明山國家公園",
-      latitude: 25.1559,
-      longitude: 121.5468,
-      description: "擁有豐富的火山地形和溫泉資源，春季賞花、夏季避暑的絕佳去處。",
-      category: "觀光景點"
-    },
-    {
-      name: "九份老街",
-      latitude: 25.1089,
-      longitude: 121.8444,
-      description: "充滿懷舊氛圍的山城，紅燈籠點綴的石板路，品嚐道地小吃。",
-      category: "觀光景點"
-    },
-    {
-      name: "象山步道",
-      latitude: 25.0230,
-      longitude: 121.5739,
-      description: "台北市區最佳觀景點，輕鬆健行即可俯瞰101與台北盆地。",
-      category: "休閒娛樂"
-    },
-    {
-      name: "淡水漁人碼頭",
-      latitude: 25.1825,
-      longitude: 121.4490,
-      description: "欣賞美麗夕陽與海景的浪漫地點，情侶約會首選。",
-      category: "休閒娛樂"
-    },
-    {
-      name: "南港展覽館",
-      latitude: 25.0553,
-      longitude: 121.6076,
-      description: "亞洲頂級展覽場地，舉辦各類商業展覽與科技活動。",
-      category: "商業區域"
-    },
-    {
-      name: "信義商圈",
-      latitude: 25.0344,
-      longitude: 121.5638,
-      description: "台北市金融與購物中心，雲集國際品牌與美食餐廳。",
-      category: "商業區域"
-    },
-    {
-      name: "台北101",
-      latitude: 25.0338,
-      longitude: 121.5646,
-      description: "台灣地標性建築，擁有世界級觀景台與精品購物中心。",
-      category: "附近熱門"
-    },
-    {
-      name: "松山文創園區",
-      latitude: 25.0436,
-      longitude: 121.5602,
-      description: "舊菸廠改建的文創空間，展覽、市集與文創商店齊聚。",
-      category: "附近熱門"
-    },
-    {
-      name: "台北小巨蛋",
-      latitude: 25.0511,
-      longitude: 121.5511,
-      description: "舉辦演唱會與體育賽事的多功能場館，娛樂活動首選。",
-      category: "休閒娛樂"
-    },
-    {
-      name: "國立故宮博物院",
-      latitude: 25.1022,
-      longitude: 121.5486,
-      description: "世界級博物館，收藏豐富中華文物與藝術珍品。",
-      category: "觀光景點"
-    },
-    {
-      name: "台北車站",
-      latitude: 25.0479,
-      longitude: 121.5170,
-      description: "台灣交通樞紐，結合購物中心與美食街的便利場所。",
-      category: "附近熱門"
-    },
-    {
-      name: "內湖科技園區",
-      latitude: 25.0797,
-      longitude: 121.5760,
-      description: "台灣軟體產業重鎮，眾多科技公司與新創企業基地。",
-      category: "商業區域"
-    },
-    {
-      name: "大安森林公園",
-      latitude: 25.0296,
-      longitude: 121.5363,
-      description: "台北市最大綠地，提供都市人放鬆休憩的自然空間。",
-      category: "休閒娛樂"
-    },
-    {
-      name: "西門町",
-      latitude: 25.0421,
-      longitude: 121.5083,
-      description: "年輕人潮流集散地，購物、美食與娛樂一應俱全。",
-      category: "附近熱門"
-    },
-    {
-      name: "台北市立動物園",
-      latitude: 24.9986,
-      longitude: 121.5807,
-      description: "亞洲知名動物園，適合全家大小一同遊玩的場所。",
-      category: "觀光景點"
-    },
-    {
-      name: "南港軟體園區",
-      latitude: 25.0600,
-      longitude: 121.6153,
-      description: "台灣軟體產業重鎮，眾多科技公司與新創企業基地。",
-      category: "商業區域"
-    }
-  ];
-
-  // 計算兩點之間的距離（使用 Haversine 公式）
-  const calculateDistance = (lat1: number, lon1: number, lat2: number, lon2: number): number => {
-    const R = 6371; // 地球半徑（公里）
-    const dLat = (lat2 - lat1) * (Math.PI / 180);
-    const dLon = (lon2 - lon1) * (Math.PI / 180);
-    const a = 
-      Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-      Math.cos(lat1 * (Math.PI / 180)) * Math.cos(lat2 * (Math.PI / 180)) * 
-      Math.sin(dLon / 2) * Math.sin(dLon / 2);
-    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-    const distance = R * c;
-    return distance;
-  };
-
-  // 根據用戶位置獲取附近景點
-  const getNearbyAttractionsByCategory = (userLat: number, userLng: number, maxDistance: number = 10) => {
-    // 計算每個景點的距離
-    const attractionsWithDistance = attractionsDatabase.map(attraction => {
-      const distance = calculateDistance(
-        userLat, 
-        userLng, 
-        attraction.latitude, 
-        attraction.longitude
-      );
-      
-      return {
-        ...attraction,
-        distance
-      };
-    });
-    
-    // 篩選出10公里範圍內的景點
-    const nearbyAttractions = attractionsWithDistance
-      .filter(attraction => attraction.distance <= maxDistance)
-      .sort((a, b) => a.distance - b.distance); // 按距離排序
-    
-    // 按類別分組
-    const categorizedAttractions = {
-      "附近熱門": nearbyAttractions.filter(a => a.category === "附近熱門"),
-      "商業區域": nearbyAttractions.filter(a => a.category === "商業區域"),
-      "休閒娛樂": nearbyAttractions.filter(a => a.category === "休閒娛樂"),
-      "觀光景點": nearbyAttractions.filter(a => a.category === "觀光景點")
-    };
-    
-    // 如果某類別沒有足夠的景點，從其他類別補充
-    Object.keys(categorizedAttractions).forEach(category => {
-      if (categorizedAttractions[category].length === 0) {
-        // 從所有附近景點中選擇最近的一個作為該類別的推薦
-        if (nearbyAttractions.length > 0) {
-          categorizedAttractions[category] = [nearbyAttractions[0]];
-        } else {
-          // 如果10公里內沒有景點，從全部景點中選擇該類別的最近景點
-          const closestAttraction = attractionsWithDistance
-            .filter(a => a.category === category)
-            .sort((a, b) => a.distance - b.distance)[0];
-          
-          if (closestAttraction) {
-            categorizedAttractions[category] = [closestAttraction];
-          } else {
-            // 如果該類別沒有景點，選擇任意一個最近的景點
-            categorizedAttractions[category] = [attractionsWithDistance[0]];
-          }
-        }
-      }
-    });
-    
-    return categorizedAttractions;
-  };
-
   // 目的地選項數據
-  const [destinationData, setDestinationData] = useState([
+  const destinationData = [
     {
       "title": "附近熱門",
       "description": "探索您附近的熱門目的地",
       "image": "https://images.unsplash.com/photo-1449965408869-eaa3f722e40d",
-      "buttonText": "選擇目的地",
-      "suggestion": "",
-      "address": ""
+      "buttonText": "選擇目的地"
     },
     {
       "title": "商業區域",
       "description": "前往主要商業區和辦公地點",
       "image": "https://images.unsplash.com/photo-1494976388531-d1058494cdd8",
-      "buttonText": "選擇目的地",
-      "suggestion": "",
-      "address": ""
+      "buttonText": "選擇目的地"
     },
     {
       "title": "休閒娛樂",
       "description": "前往購物中心、電影院和餐廳",
       "image": "https://images.unsplash.com/photo-1549317661-bd32c8ce0db2",
-      "buttonText": "選擇目的地",
-      "suggestion": "",
-      "address": ""
+      "buttonText": "選擇目的地"
     },
     {
       "title": "觀光景點",
       "description": "探索城市的主要觀光景點",
       "image": "https://images.unsplash.com/photo-1580273916550-e323be2ae537",
-      "buttonText": "選擇目的地",
-      "suggestion": "",
-      "address": ""
+      "buttonText": "選擇目的地"
     }
-  ]);
-
+  ];
   
   // 處理返回功能
   const goBack = () => {
@@ -464,37 +257,6 @@ const SelectDestination: React.FC = () => {
           // 這裡為了示例，使用固定地址
           setStartingLocation("台北市信義區松智路17號");
           setIsLoading(false);
-          
-          // 獲取附近景點並更新目的地數據
-          const nearbyAttractions = getNearbyAttractionsByCategory(latitude, longitude, 10);
-          
-          // 更新目的地數據，添加推薦景點
-          setDestinationData(prev => [
-            {
-              ...prev[0],
-              suggestion: nearbyAttractions["附近熱門"][0]?.name || "台北101",
-              address: `${nearbyAttractions["附近熱門"][0]?.name || "台北101"} (${(nearbyAttractions["附近熱門"][0]?.distance || 0).toFixed(1)}公里)`,
-              description: nearbyAttractions["附近熱門"][0]?.description || "探索您附近的熱門目的地"
-            },
-            {
-              ...prev[1],
-              suggestion: nearbyAttractions["商業區域"][0]?.name || "信義商圈",
-              address: `${nearbyAttractions["商業區域"][0]?.name || "信義商圈"} (${(nearbyAttractions["商業區域"][0]?.distance || 0).toFixed(1)}公里)`,
-              description: nearbyAttractions["商業區域"][0]?.description || "前往主要商業區和辦公地點"
-            },
-            {
-              ...prev[2],
-              suggestion: nearbyAttractions["休閒娛樂"][0]?.name || "大安森林公園",
-              address: `${nearbyAttractions["休閒娛樂"][0]?.name || "大安森林公園"} (${(nearbyAttractions["休閒娛樂"][0]?.distance || 0).toFixed(1)}公里)`,
-              description: nearbyAttractions["休閒娛樂"][0]?.description || "前往購物中心、電影院和餐廳"
-            },
-            {
-              ...prev[3],
-              suggestion: nearbyAttractions["觀光景點"][0]?.name || "國立故宮博物院",
-              address: `${nearbyAttractions["觀光景點"][0]?.name || "國立故宮博物院"} (${(nearbyAttractions["觀光景點"][0]?.distance || 0).toFixed(1)}公里)`,
-              description: nearbyAttractions["觀光景點"][0]?.description || "探索城市的主要觀光景點"
-            }
-          ]);
         },
         (error) => {
           console.error("Error getting location:", error);
@@ -751,21 +513,13 @@ const SelectDestination: React.FC = () => {
                     justify={"space-between"}
                     align={"center"}
                     px={6}
-<<<<<<< HEAD
-                    py={16}
-=======
                     py={20}
->>>>>>> cfd06f7662c1d278f638890c33a217c70ed6b003
                     className={`swiper-slide ${currentIndex === index ? 'swiper-slide-active' : ''}`}
                   >
                     <Box
                       position={"relative"}
                       w={"100%"}
-<<<<<<< HEAD
-                      h={"40vh"}
-=======
                       h={"45vh"}
->>>>>>> cfd06f7662c1d278f638890c33a217c70ed6b003
                       overflow={"hidden"}
                       borderRadius={"3xl"}
                       boxShadow={"xl"}
@@ -777,24 +531,16 @@ const SelectDestination: React.FC = () => {
                         h="100%"
                         objectFit="cover"
                       />
-                      <Box
-                        position={"absolute"}
-                        bottom={0}
-                        w={"100%"}
-                        h={"100px"}
-                        bgGradient={"linear(to-t, blackAlpha.600, transparent)"}
-                      />
                     </Box>
                     <Flex
                       direction={"column"}
                       align={"center"}
-                      mt={8}
-                      mb={4}
-                      gap={3}
-                      w="100%"
+                      mt={10}
+                      mb={6}
+                      gap={4}
                     >
                       <Text
-                        fontSize={"28px"}
+                        fontSize={"32px"}
                         fontWeight={"700"}
                         textAlign={"center"}
                         bgGradient="linear(135deg, #000000 0%, #333333 100%)"
@@ -811,30 +557,6 @@ const SelectDestination: React.FC = () => {
                       >
                         {item.description}
                       </Text>
-                      
-                      {/* 推薦景點卡片 */}
-                      {item.suggestion && (
-                        <Box
-                          mt={2}
-                          p={4}
-                          bg="white"
-                          borderRadius="xl"
-                          boxShadow="md"
-                          w="100%"
-                          maxW="320px"
-                        >
-                          <Flex align="center" mb={2}>
-                            <Icon as={FiMapPin} color="blue.500" mr={2} />
-                            <Text fontWeight="bold" fontSize="lg">{item.suggestion}</Text>
-                          </Flex>
-                          <Text fontSize="sm" color="gray.600" mb={2}>
-                            {item.address}
-                          </Text>
-                          <Text fontSize="sm" noOfLines={2}>
-                            {item.description}
-                          </Text>
-                        </Box>
-                      )}
                     </Flex>
                     <Button
                       size={"lg"}
@@ -846,26 +568,20 @@ const SelectDestination: React.FC = () => {
                       color={"white"}
                       onClick={() => {
                         setDestinationEntered(true);
-                        // 使用推薦景點作為目的地
-                        if (item.suggestion) {
-                          setDestination(item.suggestion);
-                        } else {
-                          // 備用目的地
-                          const destinations = [
-                            "台北市信義區松智路17號",
-                            "台北市信義區松仁路100號",
-                            "台北市信義區松壽路12號",
-                            "台北市信義區信義路五段7號"
-                          ];
-                          setDestination(destinations[index]);
-                        }
+                        // 根據當前索引設置不同的預設目的地
+                        const destinations = [
+                          "台北市信義區松智路17號",
+                          "台北市信義區松仁路100號",
+                          "台北市信義區松壽路12號",
+                          "台北市信義區信義路五段7號"
+                        ];
+                        setDestination(destinations[index]);
                       }}
                       _hover={{
                         transform: "translateY(-1px)",
                         boxShadow: "lg"
                       }}
                       transition={"all 0.2s"}
-                      leftIcon={<FiNavigation />}
                     >
                       <Text
                         fontSize={"17px"}
