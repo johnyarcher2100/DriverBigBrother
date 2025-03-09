@@ -35,7 +35,13 @@ const Maps: React.FC<MapsProps> = ({ userCoords, destinationCoords, style }) => 
 
     try {
       // Use Google Maps Static API to generate a map image
-      const apiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY || '';
+      // 直接使用硬編碼的 API 金鑰作為備用
+      const apiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY || 'AIzaSyD0LlTAW3UbiCbRM8mE3dL9yHTDrEwAXOE';
+      
+      console.log('環境變數檢查:', {
+        'VITE_GOOGLE_MAPS_API_KEY': import.meta.env.VITE_GOOGLE_MAPS_API_KEY,
+        'apiKey': apiKey
+      });
       
       // 檢查 API 密鑰是否存在
       if (!apiKey) {
