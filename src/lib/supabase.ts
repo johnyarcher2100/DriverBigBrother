@@ -1,8 +1,13 @@
 import { createClient } from '@supabase/supabase-js';
 
 // 使用環境變數或使用默認值（用於本地開發）
+<<<<<<< HEAD
 const supabaseUrl = process.env.VITE_SUPABASE_URL || 'https://ensssogtfnbmbyebwkhe.supabase.co';
 const supabaseAnonKey = process.env.VITE_SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVuc3Nzb2d0Zm5ibWJ5ZWJ3a2hlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDExNzEwMzgsImV4cCI6MjA1Njc0NzAzOH0.wpD8ySgRMWuk3_unDs1UAVXLKt-GMVETvg3axsxQ8-Y';
+=======
+const supabaseUrl = 'https://ensssogtfnbmbyebwkhe.supabase.co';
+const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVuc3Nzb2d0Zm5ibWJ5ZWJ3a2hlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDExNzEwMzgsImV4cCI6MjA1Njc0NzAzOH0.wpD8ySgRMWuk3_unDs1UAVXLKt-GMVETvg3axsxQ8-Y';
+>>>>>>> cfd06f7662c1d278f638890c33a217c70ed6b003
 
 // 初始化 Supabase 客戶端
 export const supabase = createClient(supabaseUrl, supabaseAnonKey);

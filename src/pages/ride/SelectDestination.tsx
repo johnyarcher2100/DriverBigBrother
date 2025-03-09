@@ -208,7 +208,7 @@ const SelectDestination: React.FC = () => {
       name: "內湖科技園區",
       latitude: 25.0797,
       longitude: 121.5760,
-      description: "台北科技產業重鎮，雲集國內外知名科技公司總部。",
+      description: "台灣軟體產業重鎮，眾多科技公司與新創企業基地。",
       category: "商業區域"
     },
     {
@@ -345,6 +345,7 @@ const SelectDestination: React.FC = () => {
       "address": ""
     }
   ]);
+
   
   // 處理返回功能
   const goBack = () => {
@@ -750,13 +751,21 @@ const SelectDestination: React.FC = () => {
                     justify={"space-between"}
                     align={"center"}
                     px={6}
+<<<<<<< HEAD
                     py={16}
+=======
+                    py={20}
+>>>>>>> cfd06f7662c1d278f638890c33a217c70ed6b003
                     className={`swiper-slide ${currentIndex === index ? 'swiper-slide-active' : ''}`}
                   >
                     <Box
                       position={"relative"}
                       w={"100%"}
+<<<<<<< HEAD
                       h={"40vh"}
+=======
+                      h={"45vh"}
+>>>>>>> cfd06f7662c1d278f638890c33a217c70ed6b003
                       overflow={"hidden"}
                       borderRadius={"3xl"}
                       boxShadow={"xl"}
