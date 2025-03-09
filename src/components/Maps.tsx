@@ -6,13 +6,18 @@ interface MapsProps {
     lat: number;
     lng: number;
   };
+  destinationCoords?: {
+    lat: number;
+    lng: number;
+  };
   style?: React.CSSProperties;
 }
 
 /**
  * Maps component to display a static map using Google Maps Static API
+ * Can show user location only, or user location and destination with route
  */
-const Maps: React.FC<MapsProps> = ({ userCoords, style }) => {
+const Maps: React.FC<MapsProps> = ({ userCoords, destinationCoords, style }) => {
   const [mapImageUrl, setMapImageUrl] = useState<string>('');
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<string>('');
@@ -27,14 +32,25 @@ const Maps: React.FC<MapsProps> = ({ userCoords, style }) => {
     try {
       // Use Google Maps Static API to generate a map image
       const apiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY || '';
-      setMapImageUrl(`https://maps.googleapis.com/maps/api/staticmap?center=${userCoords.lat},${userCoords.lng}&zoom=14&size=800x600&scale=2&maptype=roadmap&markers=color:red%7C${userCoords.lat},${userCoords.lng}&map_id=roadmap&key=${apiKey}`);
+      
+      let mapUrl = '';
+      
+      if (destinationCoords && destinationCoords.lat !== 0 && destinationCoords.lng !== 0) {
+        // If we have destination coordinates, show a route
+        mapUrl = `https://maps.googleapis.com/maps/api/staticmap?size=800x600&scale=2&maptype=roadmap&markers=color:green%7Clabel:S%7C${userCoords.lat},${userCoords.lng}&markers=color:red%7Clabel:D%7C${destinationCoords.lat},${destinationCoords.lng}&path=color:0x0000ff|weight:5|${userCoords.lat},${userCoords.lng}|${destinationCoords.lat},${destinationCoords.lng}&key=${apiKey}`;
+      } else {
+        // Otherwise just show the user location
+        mapUrl = `https://maps.googleapis.com/maps/api/staticmap?center=${userCoords.lat},${userCoords.lng}&zoom=14&size=800x600&scale=2&maptype=roadmap&markers=color:red%7C${userCoords.lat},${userCoords.lng}&key=${apiKey}`;
+      }
+      
+      setMapImageUrl(mapUrl);
       setIsLoading(false);
     } catch (err) {
       console.error('Error generating map URL:', err);
       setError('無法載入地圖');
       setIsLoading(false);
     }
-  }, [userCoords]);
+  }, [userCoords, destinationCoords]);
 
   if (isLoading) {
     return (
