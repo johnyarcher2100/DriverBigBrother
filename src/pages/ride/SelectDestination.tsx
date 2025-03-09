@@ -106,37 +106,126 @@ const SelectDestination: React.FC = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [locationError, setLocationError] = useState("");
   const [userCoords, setUserCoords] = useState({ lat: 0, lng: 0 });
+  const [destinationCoords, setDestinationCoords] = useState({ lat: 0, lng: 0 });
   const [destinationEntered, setDestinationEntered] = useState(false);
   const [routeCalculated, setRouteCalculated] = useState(false);
   const [showRecentLocations, setShowRecentLocations] = useState(true);
   const [currentIndex, setCurrentIndex] = useState(0);
   // These state variables will be used for swiper navigation in future implementation
   
-  // 目的地選項數據
+  // 目的地選項數據 - 根據用戶位置提供10公里內的推薦地點
   const destinationData = [
     {
       "title": "附近熱門",
       "description": "探索您附近的熱門目的地",
       "image": "https://images.unsplash.com/photo-1449965408869-eaa3f722e40d",
-      "buttonText": "選擇目的地"
+      "buttonText": "選擇目的地",
+      "recommendations": [
+        {
+          "name": "微風南山",
+          "address": "台北市信義區松智路17號",
+          "description": "結合時尚、美食與生活品味的複合式購物中心，提供多元化的購物體驗。"
+        },
+        {
+          "name": "松山文創園區",
+          "address": "台北市信義區光復南路133號",
+          "description": "前身為菸廠，現為文創基地，定期舉辦展覽與市集，充滿文藝氣息。"
+        },
+        {
+          "name": "四四南村",
+          "address": "台北市信義區松勤街50號",
+          "description": "保存完整的眷村，見證台北發展歷史，現有文創店家與展覽空間。"
+        },
+        {
+          "name": "誠品信義店",
+          "address": "台北市信義區松高路11號",
+          "description": "24小時書店旗艦店，集結書籍、藝文與生活風格，是文青必訪地標。"
+        }
+      ]
     },
     {
       "title": "商業區域",
       "description": "前往主要商業區和辦公地點",
       "image": "https://images.unsplash.com/photo-1494976388531-d1058494cdd8",
-      "buttonText": "選擇目的地"
+      "buttonText": "選擇目的地",
+      "recommendations": [
+        {
+          "name": "台北101",
+          "address": "台北市信義區信義路五段7號",
+          "description": "台北地標性摩天大樓，匯集國際企業總部與高端商務空間，商務人士首選。"
+        },
+        {
+          "name": "南山廣場",
+          "address": "台北市信義區松仁路100號",
+          "description": "現代化商業大樓，匯集金融與科技企業，提供頂級辦公環境。"
+        },
+        {
+          "name": "信義計畫區",
+          "address": "台北市信義區信義路",
+          "description": "台北金融核心區，雲集國際企業與金融機構，是商務活動中心。"
+        },
+        {
+          "name": "國泰金融中心",
+          "address": "台北市信義區松仁路7號",
+          "description": "金融巨擘總部大樓，現代化設計與頂級設施，商務會議理想場所。"
+        }
+      ]
     },
     {
       "title": "休閒娛樂",
       "description": "前往購物中心、電影院和餐廳",
       "image": "https://images.unsplash.com/photo-1549317661-bd32c8ce0db2",
-      "buttonText": "選擇目的地"
+      "buttonText": "選擇目的地",
+      "recommendations": [
+        {
+          "name": "ATT 4 Recharge",
+          "address": "台北市信義區松壽路12號",
+          "description": "年輕潮流購物中心，集結時尚品牌與美食，提供全方位休閒體驗。"
+        },
+        {
+          "name": "威秀影城",
+          "address": "台北市信義區松壽路18號",
+          "description": "頂級電影院，配備IMAX與4DX影廳，提供沉浸式觀影體驗。"
+        },
+        {
+          "name": "新光三越信義新天地",
+          "address": "台北市信義區松高路19號",
+          "description": "大型百貨公司，匯集國際精品與美食，是購物休閒的首選地點。"
+        },
+        {
+          "name": "饗食天堂",
+          "address": "台北市信義區松高路12號",
+          "description": "高級自助餐廳，提供多國料理與精緻甜點，適合聚餐與慶祝。"
+        }
+      ]
     },
     {
       "title": "觀光景點",
       "description": "探索城市的主要觀光景點",
       "image": "https://images.unsplash.com/photo-1580273916550-e323be2ae537",
-      "buttonText": "選擇目的地"
+      "buttonText": "選擇目的地",
+      "recommendations": [
+        {
+          "name": "台北101觀景台",
+          "address": "台北市信義區信義路五段7號",
+          "description": "登上89樓觀景台，360度俯瞰台北全景，感受現代都市魅力。"
+        },
+        {
+          "name": "象山步道",
+          "address": "台北市信義區信義路五段150巷",
+          "description": "輕鬆健行路線，可眺望台北101與城市夜景，攝影愛好者必訪。"
+        },
+        {
+          "name": "松山文創園區",
+          "address": "台北市信義區光復南路133號",
+          "description": "歷史建築改建的文創空間，定期舉辦展覽與活動，文藝氣息濃厚。"
+        },
+        {
+          "name": "虎山步道",
+          "address": "台北市信義區福德街251巷",
+          "description": "親近自然的登山路線，可遠眺台北盆地，享受城市中的綠意。"
+        }
+      ]
     }
   ];
   
@@ -219,6 +308,16 @@ const SelectDestination: React.FC = () => {
     setDestination(address);
     setDestinationEntered(true);
     setShowRecentLocations(false);
+    
+    // 模擬目的地坐標 - 在實際應用中應使用 Geocoding API
+    const hash = address.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
+    const latOffset = ((hash % 100) - 50) / 1000;
+    const lngOffset = ((hash % 100) - 50) / 1000;
+    
+    setDestinationCoords({
+      lat: userCoords.lat + latOffset,
+      lng: userCoords.lng + lngOffset
+    });
   };
   
   // 處理最近位置選擇
@@ -226,6 +325,16 @@ const SelectDestination: React.FC = () => {
     setDestination(address);
     setDestinationEntered(true);
     setShowRecentLocations(false);
+    
+    // 模擬目的地坐標 - 在實際應用中應使用 Geocoding API
+    const hash = address.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
+    const latOffset = ((hash % 100) - 50) / 1000;
+    const lngOffset = ((hash % 100) - 50) / 1000;
+    
+    setDestinationCoords({
+      lat: userCoords.lat + latOffset,
+      lng: userCoords.lng + lngOffset
+    });
   };
   
   // 計算路線
@@ -238,6 +347,16 @@ const SelectDestination: React.FC = () => {
     const hash = destination.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
     const randomTime = (hash % 20) + 10; // 10-30分鐘
     const randomDistance = ((hash % 50) + 10) / 10; // 1.0-6.0公里
+    
+    // 模擬目的地坐標 - 在實際應用中應使用 Geocoding API 獲取真實坐標
+    // 這裡根據目的地字符串生成一個假的坐標，與用戶坐標有一定距離
+    const latOffset = ((hash % 100) - 50) / 1000; // 生成 -0.05 到 0.05 的偏移
+    const lngOffset = ((hash % 100) - 50) / 1000; // 生成 -0.05 到 0.05 的偏移
+    
+    setDestinationCoords({
+      lat: userCoords.lat + latOffset,
+      lng: userCoords.lng + lngOffset
+    });
     
     setEstimatedTime(randomTime.toString());
     setDistance(randomDistance.toFixed(1));
@@ -257,6 +376,12 @@ const SelectDestination: React.FC = () => {
           // 這裡為了示例，使用固定地址
           setStartingLocation("台北市信義區松智路17號");
           setIsLoading(false);
+          
+          // 設置一個初始目的地坐標，用於測試 - 實際應用中應移除
+          setDestinationCoords({
+            lat: latitude + 0.01,
+            lng: longitude + 0.01
+          });
         },
         (error) => {
           console.error("Error getting location:", error);
@@ -309,6 +434,15 @@ const SelectDestination: React.FC = () => {
           <Text fontWeight="bold" fontSize="lg">選擇目的地</Text>
           <Box w="40px"></Box> {/* 為了平衡布局 */}
         </Flex>
+        
+        {/* 地圖區域 */}
+        <Box h="30vh" position="relative">
+          <Maps 
+            userCoords={userCoords} 
+            destinationCoords={destinationEntered ? destinationCoords : undefined}
+            style={{ width: '100%', height: '100%' }}
+          />
+        </Box>
         
         {/* 主要內容 */}
         {destinationEntered ? (
@@ -432,6 +566,7 @@ const SelectDestination: React.FC = () => {
                   <Maps 
                     style={{ width: '100%', height: '100%' }} 
                     userCoords={userCoords} 
+                    destinationCoords={destinationCoords}
                   />
                 </Box>
               </Box>
@@ -513,13 +648,13 @@ const SelectDestination: React.FC = () => {
                     justify={"space-between"}
                     align={"center"}
                     px={6}
-                    py={20}
+                    py={16}
                     className={`swiper-slide ${currentIndex === index ? 'swiper-slide-active' : ''}`}
                   >
                     <Box
                       position={"relative"}
                       w={"100%"}
-                      h={"45vh"}
+                      h={"40vh"}
                       overflow={"hidden"}
                       borderRadius={"3xl"}
                       boxShadow={"xl"}
@@ -531,32 +666,76 @@ const SelectDestination: React.FC = () => {
                         h="100%"
                         objectFit="cover"
                       />
+                      <Box
+                        position="absolute"
+                        bottom={0}
+                        left={0}
+                        right={0}
+                        bg="rgba(0,0,0,0.6)"
+                        color="white"
+                        p={4}
+                      >
+                        <Text fontSize="xl" fontWeight="bold">{item.title}</Text>
+                        <Text fontSize="sm">{item.description}</Text>
+                      </Box>
                     </Box>
                     <Flex
                       direction={"column"}
                       align={"center"}
-                      mt={10}
-                      mb={6}
+                      mt={6}
+                      mb={4}
                       gap={4}
+                      w="100%"
                     >
                       <Text
-                        fontSize={"32px"}
+                        fontSize={"24px"}
                         fontWeight={"700"}
                         textAlign={"center"}
                         bgGradient="linear(135deg, #000000 0%, #333333 100%)"
                         bgClip="text"
+                        mb={1}
                       >
-                        {item.title}
+                        推薦地點
                       </Text>
-                      <Text
-                        fontSize={"16px"}
-                        color={kStyleGlobal.colors.gray[600]}
-                        textAlign={"center"}
-                        maxW={"300px"}
-                        lineHeight={"1.6"}
-                      >
-                        {item.description}
-                      </Text>
+                      <VStack spacing={3} w="100%" align="stretch">
+                        {item.recommendations && item.recommendations.map((rec, recIndex) => (
+                          <Box 
+                            key={recIndex} 
+                            p={3} 
+                            bg="white" 
+                            borderRadius="lg" 
+                            boxShadow="md"
+                            _hover={{ bg: "gray.50", transform: "translateY(-2px)" }}
+                            transition="all 0.2s"
+                            cursor="pointer"
+                            onClick={() => {
+                              setDestination(rec.address);
+                              setDestinationEntered(true);
+                              
+                              // 模擬目的地坐標 - 在實際應用中應使用 Geocoding API
+                              const hash = rec.address.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
+                              const latOffset = ((hash % 100) - 50) / 1000;
+                              const lngOffset = ((hash % 100) - 50) / 1000;
+                              
+                              setDestinationCoords({
+                                lat: userCoords.lat + latOffset,
+                                lng: userCoords.lng + lngOffset
+                              });
+                              
+                              toast({
+                                title: `已選擇: ${rec.name}`,
+                                description: rec.description,
+                                status: "info",
+                                duration: 3000,
+                                isClosable: true,
+                              });
+                            }}
+                          >
+                            <Text fontWeight="bold" fontSize="md">{rec.name}</Text>
+                            <Text fontSize="xs" color="gray.500" noOfLines={1}>{rec.address}</Text>
+                          </Box>
+                        ))}
+                      </VStack>
                     </Flex>
                     <Button
                       size={"lg"}
@@ -568,14 +747,32 @@ const SelectDestination: React.FC = () => {
                       color={"white"}
                       onClick={() => {
                         setDestinationEntered(true);
-                        // 根據當前索引設置不同的預設目的地
-                        const destinations = [
-                          "台北市信義區松智路17號",
-                          "台北市信義區松仁路100號",
-                          "台北市信義區松壽路12號",
-                          "台北市信義區信義路五段7號"
+                        // 根據當前索引和用戶選擇設置不同的預設目的地
+                        const currentCategory = destinationData[index];
+                        // 隨機選擇該類別中的一個推薦地點
+                        const randomRecommendation = currentCategory.recommendations[
+                          Math.floor(Math.random() * currentCategory.recommendations.length)
                         ];
-                        setDestination(destinations[index]);
+                        setDestination(randomRecommendation.address);
+                        
+                        // 模擬目的地坐標 - 在實際應用中應使用 Geocoding API
+                        const hash = randomRecommendation.address.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
+                        const latOffset = ((hash % 100) - 50) / 1000;
+                        const lngOffset = ((hash % 100) - 50) / 1000;
+                        
+                        setDestinationCoords({
+                          lat: userCoords.lat + latOffset,
+                          lng: userCoords.lng + lngOffset
+                        });
+                        
+                        // 顯示推薦地點的提示
+                        toast({
+                          title: `已選擇: ${randomRecommendation.name}`,
+                          description: randomRecommendation.description,
+                          status: "info",
+                          duration: 3000,
+                          isClosable: true,
+                        });
                       }}
                       _hover={{
                         transform: "translateY(-1px)",
