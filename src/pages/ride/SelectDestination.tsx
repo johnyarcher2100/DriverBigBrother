@@ -310,13 +310,39 @@ const SelectDestination: React.FC = () => {
     setShowRecentLocations(false);
     
     // 模擬目的地坐標 - 在實際應用中應使用 Geocoding API
-    const hash = address.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
-    const latOffset = ((hash % 100) - 50) / 1000;
-    const lngOffset = ((hash % 100) - 50) / 1000;
+    // 使用更可靠的方式生成模擬坐標
+    let destinationLat = 0;
+    let destinationLng = 0;
+    
+    // 根據地址中的關鍵詞設置不同區域的座標
+    if (address.includes('信義區')) {
+      destinationLat = 25.033964;
+      destinationLng = 121.564468;
+    } else if (address.includes('大安區')) {
+      destinationLat = 25.026761;
+      destinationLng = 121.543444;
+    } else if (address.includes('松山區')) {
+      destinationLat = 25.060455;
+      destinationLng = 121.556610;
+    } else if (address.includes('南港區')) {
+      destinationLat = 25.055285;
+      destinationLng = 121.607255;
+    } else if (address.includes('中正區')) {
+      destinationLat = 25.032969;
+      destinationLng = 121.519624;
+    } else {
+      // 如果沒有匹配的區域，使用一個小偏移量
+      const hash = address.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
+      const latOffset = ((hash % 100) - 50) / 2000;
+      const lngOffset = ((hash % 100) - 50) / 2000;
+      
+      destinationLat = userCoords.lat + latOffset;
+      destinationLng = userCoords.lng + lngOffset;
+    }
     
     setDestinationCoords({
-      lat: userCoords.lat + latOffset,
-      lng: userCoords.lng + lngOffset
+      lat: destinationLat,
+      lng: destinationLng
     });
   };
   
@@ -327,13 +353,33 @@ const SelectDestination: React.FC = () => {
     setShowRecentLocations(false);
     
     // 模擬目的地坐標 - 在實際應用中應使用 Geocoding API
-    const hash = address.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
-    const latOffset = ((hash % 100) - 50) / 1000;
-    const lngOffset = ((hash % 100) - 50) / 1000;
+    // 使用更可靠的方式生成模擬坐標
+    let destinationLat = 0;
+    let destinationLng = 0;
+    
+    // 根據地址中的關鍵詞設置不同地標的座標
+    if (address.includes('台北101')) {
+      destinationLat = 25.033964;
+      destinationLng = 121.564468;
+    } else if (address.includes('松山機場')) {
+      destinationLat = 25.063039;
+      destinationLng = 121.551820;
+    } else if (address.includes('台北車站')) {
+      destinationLat = 25.047924;
+      destinationLng = 121.517081;
+    } else {
+      // 如果沒有匹配的地標，使用一個小偏移量
+      const hash = address.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
+      const latOffset = ((hash % 100) - 50) / 2000;
+      const lngOffset = ((hash % 100) - 50) / 2000;
+      
+      destinationLat = userCoords.lat + latOffset;
+      destinationLng = userCoords.lng + lngOffset;
+    }
     
     setDestinationCoords({
-      lat: userCoords.lat + latOffset,
-      lng: userCoords.lng + lngOffset
+      lat: destinationLat,
+      lng: destinationLng
     });
   };
   
@@ -348,52 +394,88 @@ const SelectDestination: React.FC = () => {
     const randomTime = (hash % 20) + 10; // 10-30分鐘
     const randomDistance = ((hash % 50) + 10) / 10; // 1.0-6.0公里
     
-    // 模擬目的地坐標 - 在實際應用中應使用 Geocoding API 獲取真實坐標
-    // 這裡根據目的地字符串生成一個假的坐標，與用戶坐標有一定距離
-    const latOffset = ((hash % 100) - 50) / 1000; // 生成 -0.05 到 0.05 的偏移
-    const lngOffset = ((hash % 100) - 50) / 1000; // 生成 -0.05 到 0.05 的偏移
-    
-    setDestinationCoords({
-      lat: userCoords.lat + latOffset,
-      lng: userCoords.lng + lngOffset
-    });
+    // 只有在尚未設置目的地坐標時才設置
+    // 這避免了覆蓋已經由其他方法（如快速選擇）設置的坐標
+    if (destinationCoords.lat === 0 && destinationCoords.lng === 0) {
+      // 模擬目的地坐標 - 在實際應用中應使用 Geocoding API 獲取真實坐標
+      // 使用更可靠的方式生成模擬坐標
+      let destinationLat = 0;
+      let destinationLng = 0;
+      
+      // 根據地址中的關鍵詞設置不同區域的座標
+      if (destination.includes('信義區')) {
+        destinationLat = 25.033964;
+        destinationLng = 121.564468;
+      } else if (destination.includes('大安區')) {
+        destinationLat = 25.026761;
+        destinationLng = 121.543444;
+      } else if (destination.includes('松山區')) {
+        destinationLat = 25.060455;
+        destinationLng = 121.556610;
+      } else if (destination.includes('南港區')) {
+        destinationLat = 25.055285;
+        destinationLng = 121.607255;
+      } else if (destination.includes('中正區')) {
+        destinationLat = 25.032969;
+        destinationLng = 121.519624;
+      } else {
+        // 如果沒有匹配的區域，使用一個小偏移量
+        const latOffset = ((hash % 100) - 50) / 2000;
+        const lngOffset = ((hash % 100) - 50) / 2000;
+        
+        destinationLat = userCoords.lat + latOffset;
+        destinationLng = userCoords.lng + lngOffset;
+      }
+      
+      setDestinationCoords({
+        lat: destinationLat,
+        lng: destinationLng
+      });
+    }
     
     setEstimatedTime(randomTime.toString());
     setDistance(randomDistance.toFixed(1));
     setRouteCalculated(true);
-  }, [destination, userCoords]);
+  }, [destination, userCoords, destinationCoords]);
   
   // 獲取用戶位置
   useEffect(() => {
+    // 設置默認位置（台北市中心）以防無法獲取真實位置
+    const defaultCoords = { lat: 25.033964, lng: 121.564468 };
+    
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
         (position) => {
           const { latitude, longitude } = position.coords;
-          setUserCoords({ lat: latitude, lng: longitude });
+          
+          // 檢查座標是否有效
+          if (latitude && longitude && !isNaN(latitude) && !isNaN(longitude)) {
+            console.log("獲取到有效座標:", latitude, longitude);
+            setUserCoords({ lat: latitude, lng: longitude });
+          } else {
+            console.warn("獲取到無效座標，使用默認座標");
+            setUserCoords(defaultCoords);
+          }
           
           // 使用反向地理編碼獲取地址
           // 在實際應用中，應使用 Google Maps Geocoding API
           // 這裡為了示例，使用固定地址
           setStartingLocation("台北市信義區松智路17號");
           setIsLoading(false);
-          
-          // 設置一個初始目的地坐標，用於測試 - 實際應用中應移除
-          setDestinationCoords({
-            lat: latitude + 0.01,
-            lng: longitude + 0.01
-          });
         },
         (error) => {
           console.error("Error getting location:", error);
-          setLocationError("無法獲取您的位置，請檢查位置權限設置");
-          setStartingLocation("無法獲取位置");
+          setLocationError("無法獲取您的位置，使用默認位置");
+          setStartingLocation("台北市中心（默認位置）");
+          setUserCoords(defaultCoords); // 使用默認座標
           setIsLoading(false);
         },
         { enableHighAccuracy: true, timeout: 15000, maximumAge: 10000 }
       );
     } else {
-      setLocationError("您的瀏覽器不支持地理位置功能");
-      setStartingLocation("無法獲取位置");
+      setLocationError("您的瀏覽器不支持地理位置功能，使用默認位置");
+      setStartingLocation("台北市中心（默認位置）");
+      setUserCoords(defaultCoords); // 使用默認座標
       setIsLoading(false);
     }
   }, []);
