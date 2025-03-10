@@ -3,7 +3,6 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
-import { API_CONFIG } from '../config/constants';
 import {
   Box,
   Flex,
@@ -31,13 +30,15 @@ const Home = () => {
   const [currentLocation, setCurrentLocation] = useState("正在获取位置...");
   const [isLoadingLocation, setIsLoadingLocation] = useState(true);
 
-  // Google Maps API Key from centralized config
-  const GOOGLE_MAPS_API_KEY = API_CONFIG.GOOGLE_MAPS.API_KEY;
+  // Google Maps API Key - 直接設置 API 金鑰確保能正確使用
+  // 從環境變數讀取，如果無法讀取則使用備用值
+  const GOOGLE_MAPS_API_KEY = import.meta.env.VITE_GOOGLE_MAPS_API_KEY || "AIzaSyD-I0lR5y5-U9Ll052FlPJgBYD1QcK55qE";
   
-  // 檢查 API 金鑰是否存在
+  // 在控制台輸出 API 金鑰狀態
   useEffect(() => {
+    console.log("使用的 Google Maps API 金鑰：", GOOGLE_MAPS_API_KEY ? "已設置" : "未設置");
     if (!GOOGLE_MAPS_API_KEY) {
-      console.error("Google Maps API Key 未設置！請檢查 .env 檔案。");
+      console.error("Google Maps API Key 未設置！");
       setCurrentLocation("API 金鑰未設置");
     }
   }, [GOOGLE_MAPS_API_KEY]);

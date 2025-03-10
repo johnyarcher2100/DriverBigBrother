@@ -2,6 +2,12 @@
  * 应用程序常量配置
  */
 
+// 調試環境變數
+console.log('環境變數檢查：', {
+  MAPS_API_KEY: import.meta.env.VITE_GOOGLE_MAPS_API_KEY,
+  ENV_VARS: import.meta.env
+});
+
 // API 配置
 export const API_CONFIG = {
   // Supabase 配置
