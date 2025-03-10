@@ -34,6 +34,14 @@ const Home = () => {
   // Google Maps API Key from centralized config
   const GOOGLE_MAPS_API_KEY = API_CONFIG.GOOGLE_MAPS.API_KEY;
   
+  // 檢查 API 金鑰是否存在
+  useEffect(() => {
+    if (!GOOGLE_MAPS_API_KEY) {
+      console.error("Google Maps API Key 未設置！請檢查 .env 檔案。");
+      setCurrentLocation("API 金鑰未設置");
+    }
+  }, [GOOGLE_MAPS_API_KEY]);
+  
   // 获取用户当前位置
   useEffect(() => {
     const getUserLocation = () => {
@@ -47,9 +55,18 @@ const Home = () => {
             const { latitude, longitude } = position.coords;
             console.log("成功获取坐标:", latitude, longitude);
             
+            // 檢查 API 金鑰是否存在
+            if (!GOOGLE_MAPS_API_KEY) {
+              console.error("Google Maps API Key 為空，無法請求 Geocoding API");
+              setCurrentLocation("API 金鑰未設置");
+              setIsLoadingLocation(false);
+              return;
+            }
+            
             // 使用 Google Maps Geocoding API 将坐标转换为地址
             const geocodingUrl = `https://maps.googleapis.com/maps/api/geocode/json?latlng=${latitude},${longitude}&key=${GOOGLE_MAPS_API_KEY}&language=zh-TW`;
-            console.log("请求 Geocoding API:", geocodingUrl);
+            console.log("请求 Geocoding API 地址 (不含金鑰):", 
+              `https://maps.googleapis.com/maps/api/geocode/json?latlng=${latitude},${longitude}&language=zh-TW`);
             
             fetch(geocodingUrl)
               .then(response => response.json())
@@ -112,7 +129,18 @@ const Home = () => {
                   }
                 } else {
                   console.error("Google Maps Geocoding API 错误:", data.status);
-                  setCurrentLocation("無法獲取位置");
+                  console.error("錯誤詳情:", data.error_message || "無錯誤訊息");
+                  
+                  // 根據錯誤狀態提供更具體的錯誤訊息
+                  if (data.status === "REQUEST_DENIED") {
+                    setCurrentLocation("API 請求被拒絕，可能是金鑰無效");
+                  } else if (data.status === "INVALID_REQUEST") {
+                    setCurrentLocation("無效的 API 請求");
+                  } else if (data.status === "OVER_QUERY_LIMIT") {
+                    setCurrentLocation("API 請求超出配額限制");
+                  } else {
+                    setCurrentLocation("無法獲取位置: " + data.status);
+                  }
                 }
                 setIsLoadingLocation(false);
               })
