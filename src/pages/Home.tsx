@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
+import { API_CONFIG } from '../config/constants';
 import {
   Box,
   Flex,
@@ -30,8 +31,8 @@ const Home = () => {
   const [currentLocation, setCurrentLocation] = useState("正在获取位置...");
   const [isLoadingLocation, setIsLoadingLocation] = useState(true);
 
-  // Google Maps API Key
-  const GOOGLE_MAPS_API_KEY = import.meta.env.VITE_GOOGLE_MAPS_API_KEY || "AIzaSyD0LlTAW3UbiCbRM8mE3dL9yHTDrEwAXOE";
+  // Google Maps API Key from centralized config
+  const GOOGLE_MAPS_API_KEY = API_CONFIG.GOOGLE_MAPS.API_KEY;
   
   // 获取用户当前位置
   useEffect(() => {
